@@ -111,6 +111,11 @@ _SUBTILE_CASES = [
     pytest.param((3, 37, 65), 7, -1, id="rank3_w"),
     pytest.param((1, 2, 17, 33), 2, 2, id="face_boundary_h"),
     pytest.param((2, 3, 1, 1), 5, -1, id="single_element_w"),
+    pytest.param((1, 2, 17, 33), 2, -1, id="packed_w_ragged_r2"),
+    pytest.param((1, 2, 17, 33), 4, -1, id="packed_w_ragged_r4"),
+    pytest.param((1, 2, 17, 33), 8, -1, id="packed_w_ragged_r8"),
+    pytest.param((3, 5), 16, 1, id="rank2_w_repeat16_fallback"),
+    pytest.param((1, 2, 1, 1), 8, -1, id="packed_w_single_element"),
 ]
 _SUBTILE_TORCH_DTYPES = {ttnn.bfloat16: torch.bfloat16, ttnn.float32: torch.float32, ttnn.int32: torch.int32}
 
@@ -165,7 +170,8 @@ def test_pc_repeat_interleave_codegen_subtile(device, shape, repeats, dim, dtype
 
 @pytest.mark.parametrize("dim", [-2, -1])
 @pytest.mark.parametrize("dtype", [ttnn.bfloat16, ttnn.float32], ids=["bfloat16", "float32"])
-def test_repeat_interleave_codegen_subtile_special_bits(device, dim, dtype):
+@pytest.mark.parametrize("repeats", [2, 3, 4, 8])
+def test_repeat_interleave_codegen_subtile_special_bits(device, dim, dtype, repeats):
     if dtype == ttnn.bfloat16:
         patterns = [0x0000, 0x8000, 0x0001, 0x8001, 0x007F, 0x0080, 0x7F7F, 0x7F80, 0xFF80, 0x7FC1, 0xFFC2, 0x7F81]
         bits = torch.tensor(patterns, dtype=torch.int64).to(torch.int16)
@@ -190,8 +196,8 @@ def test_repeat_interleave_codegen_subtile_special_bits(device, dim, dtype):
     source = bits[indices].view(_SUBTILE_TORCH_DTYPES[dtype]).reshape(shape)
     input_tensor = ttnn.from_torch(source, dtype=dtype, layout=ttnn.TILE_LAYOUT, device=device)
     _assert_subtile_bits(source, ttnn.to_torch(input_tensor))
-    output = _force_codegen(input_tensor, 3, dim)
-    _assert_subtile_bits(torch.repeat_interleave(source, 3, dim), ttnn.to_torch(output))
+    output = _force_codegen(input_tensor, repeats, dim)
+    _assert_subtile_bits(torch.repeat_interleave(source, repeats, dim), ttnn.to_torch(output))
 
 
 @pytest.mark.skip(reason="ttnn.repeat_interleave only supports `repeats` as int")

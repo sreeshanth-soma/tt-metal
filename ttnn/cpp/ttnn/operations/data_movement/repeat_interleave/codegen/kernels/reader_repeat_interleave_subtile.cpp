@@ -13,6 +13,8 @@ void kernel_main() {
     constexpr uint32_t tile_elements = 32 * 32;
     constexpr uint32_t tile_bytes = tile_elements * element_bytes;
     constexpr uint32_t elements_per_word = sizeof(uint32_t) / element_bytes;
+    constexpr uint32_t words_per_row = 16 / elements_per_word;
+    constexpr bool aligned_width_repeat = 16 % repeats == 0 && repeats <= 8;
     static_assert(repeats >= 2);
     static_assert(element_bytes == 2 || element_bytes == 4);
 
@@ -52,46 +54,111 @@ void kernel_main() {
 
         if (cached_source_page != source_page) {
             noc.async_read(source, scratch_cb, tile_bytes, {.page_id = source_page}, {.offset_bytes = 0});
+            noc.async_read_barrier();
             cached_source_page = source_page;
         }
-        noc.async_read_barrier();
 
-        uint32_t row_offsets[32];
         uint32_t col_offsets[32];
-        for (uint32_t row = 0; row < valid_rows; ++row) {
-            const uint32_t source_row = repeat_height ? (output_row_start + row) / repeats : output_row_start + row;
-            const uint32_t local_row = source_row % 32;
-            row_offsets[row] = (local_row / 16) * 512 + (local_row % 16) * 16;
-        }
-        for (uint32_t col = 0; col < valid_cols; ++col) {
-            const uint32_t source_col = repeat_height ? output_col_start + col : (output_col_start + col) / repeats;
-            const uint32_t local_col = source_col % 32;
-            col_offsets[col] = (local_col / 16) * 256 + local_col % 16;
+        if constexpr (!repeat_height && !aligned_width_repeat) {
+            for (uint32_t col = 0; col < 32; ++col) {
+                const uint32_t local_col = col < valid_cols ? ((output_col_start + col) / repeats) % 32 : 0;
+                col_offsets[col] = (local_col / 16) * 256 + local_col % 16;
+            }
         }
 
         output_cb.reserve_back(1);
         CoreLocalMem<volatile uint32_t> destination(output_cb.get_write_ptr());
-        uint32_t word_index = 0;
         for (uint32_t face = 0; face < 4; ++face) {
-            for (uint32_t face_row = 0; face_row < 16; ++face_row) {
+            const uint32_t face_col_start = (face % 2) * 16;
+            const uint32_t face_cols = valid_cols > face_col_start ? valid_cols - face_col_start : 0;
+            uint32_t face_row = 0;
+            while (face_row < 16) {
                 const uint32_t row = (face / 2) * 16 + face_row;
-                for (uint32_t face_col = 0; face_col < 16; face_col += elements_per_word) {
-                    const uint32_t col = (face % 2) * 16 + face_col;
-                    uint32_t word = 0;
-                    if (row < valid_rows && col < valid_cols) {
-                        const uint32_t source_offset = row_offsets[row] + col_offsets[col];
-                        if constexpr (element_bytes == 2) {
-                            word = source_halfwords[source_offset];
-                            if (col + 1 < valid_cols) {
-                                word |= static_cast<uint32_t>(source_halfwords[row_offsets[row] + col_offsets[col + 1]])
-                                        << 16;
+                uint32_t row_words[words_per_row] = {};
+                uint32_t row_copies = 16 - face_row;
+                if (row < valid_rows && face_cols != 0) {
+                    row_copies = 1;
+                    if constexpr (repeat_height) {
+                        const uint32_t output_row = output_row_start + row;
+                        const uint32_t source_row = (output_row / repeats) % 32;
+                        const uint32_t source_offset =
+                            ((source_row / 16) * 512 + (face % 2) * 256 + (source_row % 16) * 16) / elements_per_word;
+                        const uint32_t remaining_copies = repeats - output_row % repeats;
+                        const uint32_t remaining_rows =
+                            valid_rows - row < 16 - face_row ? valid_rows - row : 16 - face_row;
+                        row_copies = remaining_copies < remaining_rows ? remaining_copies : remaining_rows;
+#pragma GCC unroll 16
+                        for (uint32_t word = 0; word < words_per_row; ++word) {
+                            row_words[word] = source_words[source_offset + word];
+                        }
+                    } else if constexpr (aligned_width_repeat) {
+                        const uint32_t source_col = ((output_col_start + face_col_start) / repeats) % 32;
+                        const uint32_t source_offset =
+                            ((row / 16) * 512 + (row % 16) * 16 + (source_col / 16) * 256 + source_col % 16) /
+                            elements_per_word;
+                        constexpr uint32_t input_words_per_row = words_per_row / repeats;
+                        uint32_t input_words[words_per_row];
+#pragma GCC unroll 8
+                        for (uint32_t word = 0; word < input_words_per_row; ++word) {
+                            input_words[word] = source_words[source_offset + word];
+                        }
+#pragma GCC unroll 8
+                        for (uint32_t word = 0; word < input_words_per_row; ++word) {
+                            const uint32_t value = input_words[word];
+                            if constexpr (element_bytes == 2) {
+                                const uint32_t lower = (value & 0xFFFFU) | (value << 16);
+                                const uint32_t upper = (value >> 16) | (value & 0xFFFF0000U);
+#pragma GCC unroll 4
+                                for (uint32_t copy = 0; copy < repeats / 2; ++copy) {
+                                    row_words[word * repeats + copy] = lower;
+                                    row_words[word * repeats + repeats / 2 + copy] = upper;
+                                }
+                            } else {
+#pragma GCC unroll 8
+                                for (uint32_t copy = 0; copy < repeats; ++copy) {
+                                    row_words[word * repeats + copy] = value;
+                                }
                             }
-                        } else {
-                            word = source_words[source_offset];
+                        }
+                    } else {
+                        const uint32_t source_row_offset = (row / 16) * 512 + (row % 16) * 16;
+#pragma GCC unroll 16
+                        for (uint32_t word = 0; word < words_per_row; ++word) {
+                            const uint32_t col = face_col_start + word * elements_per_word;
+                            const uint32_t source_offset = source_row_offset + col_offsets[col];
+                            if constexpr (element_bytes == 2) {
+                                row_words[word] =
+                                    source_halfwords[source_offset] |
+                                    (static_cast<uint32_t>(source_halfwords[source_row_offset + col_offsets[col + 1]])
+                                     << 16);
+                            } else {
+                                row_words[word] = source_words[source_offset];
+                            }
                         }
                     }
-                    destination[word_index++] = word;
+                    if (face_cols < 16) {
+#pragma GCC unroll 16
+                        for (uint32_t word = 0; word < words_per_row; ++word) {
+                            if (word * elements_per_word >= face_cols) {
+                                row_words[word] = 0;
+                            }
+                        }
+                        if constexpr (element_bytes == 2) {
+                            if (face_cols % 2 != 0) {
+                                row_words[face_cols / 2] &= 0xFFFFU;
+                            }
+                        }
+                    }
                 }
+                uint32_t destination_offset = (face * 16 + face_row) * words_per_row;
+                for (uint32_t copy = 0; copy < row_copies; ++copy) {
+#pragma GCC unroll 16
+                    for (uint32_t word = 0; word < words_per_row; ++word) {
+                        destination[destination_offset + word] = row_words[word];
+                    }
+                    destination_offset += words_per_row;
+                }
+                face_row += row_copies;
             }
         }
         output_cb.push_back(1);

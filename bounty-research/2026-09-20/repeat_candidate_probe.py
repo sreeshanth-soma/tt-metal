@@ -14,7 +14,7 @@ import traceback
 from hardware_probe import REPEAT_CASES, Reporter, Runtime, command_result
 
 EXPECTED_BASE = "9173350554b616022b3aa7c4fbad33f13cb36aee"
-REVISION = "repeat-direct-tile-candidate-v2-branch"
+REVISION = "repeat-direct-tile-candidate-v3-packed-rows"
 SOURCE_PATHS = (
     "ttnn/cpp/ttnn/operations/data_movement/repeat_interleave/repeat_interleave.cpp",
     "ttnn/cpp/ttnn/operations/data_movement/repeat_interleave/codegen/repeat_interleave_codegen_supported.cpp",

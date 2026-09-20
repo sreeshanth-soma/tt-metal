@@ -1,7 +1,7 @@
 {
   "date": "2026-09-20",
   "base_commit": "9173350554b616022b3aa7c4fbad33f13cb36aee",
-  "status": "local_validation_passed_hardware_validation_pending",
+  "status": "packed_row_local_validation_passed_new_hardware_run_pending",
   "submission_ready": false,
   "automatic_subtile_routing": "disabled; candidate requires the existing private forced-codegen entry",
   "host_environment": {
@@ -14,60 +14,126 @@
   },
   "unittest": {
     "command": "python3 -m unittest discover -s bounty-research/2026-09-20 -p 'test_*.py' -v",
-    "tests": 39,
+    "tests": 44,
     "failures": 0,
     "errors": 0,
     "skipped": 0,
-    "elapsed_seconds": 84.061,
+    "elapsed_seconds": 103.646,
     "log": "HOST_VALIDATION.txt",
-    "log_sha256": "f2a5c4a31a307e060e88999c3f6566b7edebded3586a36cba81735fa9e75c866"
+    "log_sha256": "cb23a85fc1f71f2bb028b77cc720e1083d54b487df07b335d6b0ba50cfb02222"
   },
   "actual_reader_host_test": {
     "source": "ttnn/cpp/ttnn/operations/data_movement/repeat_interleave/codegen/kernels/reader_repeat_interleave_subtile.cpp",
-    "source_sha256": "425d81dc8450185e131a3b9a69c62899b15c16841dd2733474969051bf3e30ee",
-    "compile_time_variants": 24,
-    "cases": 6024,
-    "mock_core_invocations": 83754,
-    "checked_padded_elements": 896937984,
-    "repeat_counts": [2, 3, 4, 7, 33, 127],
-    "element_bytes": [2, 4],
-    "axes": ["height", "width"],
-    "sanitizers": ["AddressSanitizer", "UndefinedBehaviorSanitizer"],
-    "warning_flags": ["-Wall", "-Wextra", "-Werror"],
-    "scope": "Actual reader compiled against guarded host mocks, delayed mock NoC reads and a batched writer model. Not official tt-emule or device execution."
+    "source_sha256": "987446139978004bd4b9c148742382f8aefae8259fb27946baf8b280431676fc",
+    "compile_time_variants": 32,
+    "cases": 8032,
+    "mock_core_invocations": 113716,
+    "checked_padded_elements": 1020428288,
+    "repeat_counts": [
+      2,
+      3,
+      4,
+      7,
+      8,
+      16,
+      33,
+      127
+    ],
+    "element_bytes": [
+      2,
+      4
+    ],
+    "axes": [
+      "height",
+      "width"
+    ],
+    "sanitizers": [
+      "AddressSanitizer",
+      "UndefinedBehaviorSanitizer"
+    ],
+    "warning_flags": [
+      "-Wall",
+      "-Wextra",
+      "-Werror"
+    ],
+    "scope": "Actual reader compiled against guarded host mocks, delayed mock NoC reads and a batched writer model. Not official tt-emule or device execution.",
+    "source_l1_halfword_reads": 156127040,
+    "source_l1_word_reads": 186919358,
+    "output_l1_word_writes": 765321216,
+    "structural_checks": [
+      "Each output word is stored once inside the active reservation",
+      "H and aligned W use packed source loads",
+      "Aligned W reuses source words"
+    ]
   },
   "format_and_syntax": {
-    "black": {"version": "23.10.1", "checked_files": 9, "result": "pass"},
-    "clang_format": {"version": "19.1.4", "scope": "modified tracked C++ lines and the complete new reader", "result": "pass"},
+    "black": {
+      "version": "23.10.1",
+      "checked_files": 10,
+      "result": "pass",
+      "scope": "Candidate tools and device tests; unchanged earlier diagnostic helpers excluded",
+      "full_sweep_existing_format_failures": [
+        "bounty-research/2026-09-20/hardware_probe.py",
+        "bounty-research/2026-09-20/test_hardware_probe.py"
+      ]
+    },
+    "clang_format": {
+      "version": "19.1.4",
+      "scope": "Complete revised reader and two host C++ mock/test files; FixNamespaceComments=false to avoid adding comments",
+      "result": "pass",
+      "checked_files": 3
+    },
     "git_diff_check": "pass",
-    "python_3_10_grammar": {"checked_files": 11, "result": "pass"},
-    "bash_syntax": {"checked_scripts": 2, "scripts": ["setup_candidate_clone.sh", "run_candidate_validation.sh"], "result": "pass"},
-    "non_linux_hardware_workflow_refusal": {"checked_scripts": 2, "expected_exit_code": 2, "result": "pass"}
-  },
-  "patch_replay": {
-    "scope": "Earlier standalone seven-file source patch, before committing the development branch; no patch application is needed after cloning the branch",
-    "sha256": "d3452446fea98c68358d1e4f8d924a5cc151b97bf95f55ab7f52cb6c8f48d8e9",
-    "result": "git apply --check and application to git-archived clean base passed; all seven resulting files byte-match the working tree",
-    "files": 7
+    "python_3_10_grammar": {
+      "checked_files": 12,
+      "result": "pass"
+    },
+    "bash_syntax": {
+      "checked_scripts": 2,
+      "scripts": [
+        "setup_candidate_clone.sh",
+        "run_candidate_validation.sh"
+      ],
+      "result": "pass"
+    },
+    "non_linux_hardware_workflow_refusal": {
+      "checked_scripts": 2,
+      "expected_exit_code": 2,
+      "result": "pass"
+    }
   },
   "source_sha256": {
     "ttnn/cpp/ttnn/operations/data_movement/repeat_interleave/repeat_interleave.cpp": "5a8434562a55c3c084353c2da034b666361f6751d1b79589f7e75d93691218ad",
     "ttnn/cpp/ttnn/operations/data_movement/repeat_interleave/codegen/repeat_interleave_codegen_supported.cpp": "ea15df04fbf4b5abde806ba03b16899663c5f0b8be38bbf65465e0f24811b95e",
     "ttnn/cpp/ttnn/operations/data_movement/repeat_interleave/codegen/repeat_interleave_codegen_supported.hpp": "766a4ebcef4e53330cf2c9ba7a34c1485ae370b8346c742dc376dafac9cac934",
     "ttnn/cpp/ttnn/operations/data_movement/repeat_interleave/codegen/repeat_interleave_codegen_program_factory.cpp": "8cc87bcf617cf4446be79a32eece9a2b95e8a6cd35516e2073222c2245ae0fbb",
-    "ttnn/cpp/ttnn/operations/data_movement/repeat_interleave/codegen/kernels/reader_repeat_interleave_subtile.cpp": "425d81dc8450185e131a3b9a69c62899b15c16841dd2733474969051bf3e30ee",
-    "tests/ttnn/unit_tests/operations/data_movement/test_repeat_interleave.py": "1734d0fe4ea91d185b7817fdb08e4d4b92aebe2a916581b0292857999e0cbe4c",
+    "ttnn/cpp/ttnn/operations/data_movement/repeat_interleave/codegen/kernels/reader_repeat_interleave_subtile.cpp": "987446139978004bd4b9c148742382f8aefae8259fb27946baf8b280431676fc",
+    "tests/ttnn/unit_tests/operations/data_movement/test_repeat_interleave.py": "a2f341cf69ea1f0bf012570c82eaa5d2fb06b18592ab3b17cc1fecbe02d96d06",
     "tests/ttnn/nightly/unit_tests/operations/data_movement/test_repeat_interleave_codegen_routing.py": "fbc9358564118ff12187d43a59f8c9bc242edc4c3dd2173e17bc04993131d103"
   },
-  "device_test_instances_authored_not_run": 81,
   "not_validated": [
-    "Full Linux TTNN host build",
-    "Tenstorrent device compiler and actual NoC/CB execution",
-    "Physical allocation and real program-cache rebinding",
-    "Device correctness tests and installed JIT kernel availability",
-    "Wormhole or Blackhole candidate performance",
+    "Full Linux build and device JIT for the packed-row revision",
+    "Actual NoC/CB execution, physical allocation, and real cache rebinding for the packed-row revision",
+    "Expanded device correctness tests and new special-bit paths on hardware",
+    "Wormhole performance of the packed-row revision; first revision regressed device time in four cases",
+    "Blackhole correctness and performance",
+    "Installed-wheel JIT kernel packaging",
     "End-to-end model performance",
-    "Complete remote preparation and validation workflow",
     "Project CI, license-header checks and maintainer approval"
-  ]
+  ],
+  "revision": "repeat-direct-tile-candidate-v3-packed-rows",
+  "device_tests": {
+    "added_relative_to_base": 123,
+    "added_since_first_hardware_run": 42,
+    "current_revision_hardware_run": false,
+    "previous_revision_user_run": {
+      "commit": "8d601ab0ee2e7bd4383fd347b4ac6aecf820d912",
+      "passed": 135,
+      "skipped": 0,
+      "failures": 0,
+      "errors": 0,
+      "evidence": "DIRECT_TILE_V1_HARDWARE.md",
+      "provenance": "User supplied completed terminal summary; raw hardware artifacts not available locally"
+    }
+  }
 }

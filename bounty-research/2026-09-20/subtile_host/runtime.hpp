@@ -65,6 +65,9 @@ struct Context {
     uint32_t written_pages = 0;
     uint32_t source_reads = 0;
     uint32_t second_slot_reads = 0;
+    uint64_t source_l1_halfword_reads = 0;
+    uint64_t source_l1_word_reads = 0;
+    uint64_t output_l1_word_writes = 0;
 
     Context(
         std::array<uint32_t, 7> runtime_arguments,
@@ -106,6 +109,18 @@ struct Context {
         require(written_pages == arguments[1], "wrong output page count");
         require(source_reads <= arguments[1], "more than one source read per output page");
         require(second_slot_reads == 0, "reader accessed a second scratch page");
+        require(
+            output_l1_word_writes == static_cast<uint64_t>(arguments[1]) * tile_words,
+            "output word written more or less than once");
+        if constexpr (TEST_REPEAT_HEIGHT || (16 % TEST_REPEATS == 0 && TEST_REPEATS <= 8)) {
+            require(source_l1_halfword_reads == 0, "packed row path used scalar halfword loads");
+            require(source_l1_word_reads <= output_l1_word_writes, "packed row path reread output words");
+            if constexpr (!TEST_REPEAT_HEIGHT) {
+                require(
+                    source_l1_word_reads * TEST_REPEATS <= output_l1_word_writes,
+                    "aligned width path did not reuse loaded words");
+            }
+        }
         require(buffers[0].available == 0 && buffers[0].reserved == 0, "output CB did not drain");
         buffers[0].check_guards();
         buffers[1].check_guards();
@@ -242,9 +257,22 @@ public:
         auto& context = *subtile_host::active_context;
         subtile_host::require(context.pending_reads.empty(), "L1 accessed before NOC read barrier");
         const uintptr_t address = address_ + static_cast<uintptr_t>(index) * sizeof(Value);
-        const bool in_bounds =
-            context.buffers[0].contains(address, sizeof(Value)) || context.buffers[1].contains(address, sizeof(Value));
-        subtile_host::require(in_bounds, "core-local access out of bounds");
+        if (context.buffers[1].contains(address, sizeof(Value))) {
+            if constexpr (sizeof(Value) == 2) {
+                ++context.source_l1_halfword_reads;
+            } else {
+                static_assert(sizeof(Value) == 4);
+                ++context.source_l1_word_reads;
+            }
+        } else {
+            const auto& output = context.buffers[0];
+            const uintptr_t write_start = output.data() + output.write_page * subtile_host::tile_bytes;
+            subtile_host::require(
+                sizeof(Value) == 4 && output.contains(address, sizeof(Value)) && address >= write_start &&
+                    address + sizeof(Value) <= write_start + output.reserved * subtile_host::tile_bytes,
+                "core-local output access exceeds the current reservation");
+            ++context.output_l1_word_writes;
+        }
         return *reinterpret_cast<Value*>(address);
     }
 

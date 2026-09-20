@@ -14,7 +14,7 @@ if [[ "$(git rev-parse --show-toplevel)" != "$repository" ]]; then
     exit 2
 fi
 if [[ -e "$repository/python_env" || -L "$repository/python_env" ]]; then
-    echo "Refusing to overwrite python_env. For an already prepared checkout, activate its environment and run:" >&2
+    echo "Refusing to overwrite python_env. For an already prepared checkout, run:" >&2
     echo "bash bounty-research/2026-09-20/run_candidate_validation.sh --build" >&2
     exit 2
 fi

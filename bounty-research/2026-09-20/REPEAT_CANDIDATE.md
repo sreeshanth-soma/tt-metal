@@ -6,7 +6,7 @@ Date: **September 20, 2026**. Base: `9173350554b616022b3aa7c4fbad33f13cb36aee`.
 
 The submission worth pursuing is a **measured, narrowly routed, tile-preserving copy implementation of H/W repeat-interleave**. It is not a universal dense-matmul replacement and not a redo of the already-merged repeat codegen port.
 
-That candidate is now implemented in the working tree, with device regression tests and host-side verification. **It is not yet ready to claim a production speedup or submit as a completed performance fix.** The new H/W path is deliberately accessible through the existing private forced-codegen entry only. Automatic H/W routing stays on native until actual hardware correctness and performance support promotion.
+The first candidate completed the user's Wormhole build and validation: **135 device tests passed**, and the five H/W cases had lower unprofiled host latency. However, **four of five cases regressed in profiled device kernel time**. See `DIRECT_TILE_V1_HARDWARE.md` for the exact commit, source hash, reported measurements and provenance limits. The packed-row revision addresses scalar copy work but needs a new hardware run. **It is not yet ready to claim a production speedup or submit as a completed performance fix.** The H/W path remains accessible through the existing private forced-codegen entry only; public routing stays native.
 
 The candidate is on the development branch `perf/repeat-interleave-tile-copy` for hardware validation. No issue, assignment request, bounty claim or PR has been submitted. No changes were made to the earlier hardware installation.
 
@@ -23,7 +23,7 @@ These are acceptance prerequisites and relevant review precedents, not a promise
 | Rebound input/output buffers on cache hits | Same review required a second dispatch with fresh allocations | Tests retain both inputs and outputs and check cache count |
 | Installed JIT source availability | PR #50700 review discussion `3702406187` / `3703439258` found a packaging omission | New reader matches existing CMake `*.cpp` kernel glob; a fresh configure is required |
 | No dead or redundant kernel code | PR #50700 review discussion `3751739682` / `3756762075` | One reader, no new public API; unnecessary second scratch page removed |
-| Actual performance evidence without regressions | Performance category in `CONTRIBUTING.md:160` | Hardware measurements of this candidate are still missing |
+| Actual performance evidence without regressions | Performance category in `CONTRIBUTING.md:160` | First Wormhole run has four device-time regressions; packed-row revision requires remeasurement |
 | Required CI, beyond initial PR checks | `CONTRIBUTING.md:134` | Not run; maintainer-triggered coverage may be needed |
 
 The title/description searches found no open PR explicitly implementing this generic tiled H/W path at the audit time. That is **not proof of exclusivity** or permission to claim someone else's issue. Model-specific repeat elimination, concat ports, and matmul tuning are separate overlapping areas to avoid packaging into this change.
@@ -52,7 +52,7 @@ The width kernel-sum comparison is about **1.376×**, not the roughly 3× host-l
 - The private forced-codegen call fails outside its support gate; it never silently runs native.
 - Public routing checks the H/W holdback before the new geometry/L1 checks, avoiding that extra work on the unchanged native route.
 
-The patch modifies six existing source/test files and adds one reader. Research, mocks and benchmark scripts are separate from the proposed production diff in `core.patch`.
+The production/device-test changes modify six existing files and add one reader. Research, mocks and benchmark scripts are separate. The earlier standalone `core.patch` and archive, if present locally, are historical artifacts and do not contain the packed-row revision; use the Git branch instead.
 
 ### Dataflow and geometry
 
@@ -69,6 +69,8 @@ The source tile is constant across all 32 output offsets: writing `q = repeats*b
 
 Face layout is explicit: four 16×16 faces in each 32×32 tile. BF16 values are packed into 32-bit stores without arithmetic conversion. Invalid output rows/columns are zero-filled rather than populated from input padding.
 
+The packed-row revision loads an H face row once and reuses its words across consecutive repeated output rows, stopping at face boundaries and logical padding. Aligned W repeats of 2, 4 and 8 load contiguous words and replicate their integer bit fields; other W repeat counts retain an explicit column map. Face-row loads/stores are unrolled, and NoC barriers run only after an actual scratch-tile read. A masked tail prevents poisoned input padding from appearing in the output. This changes neither supported layouts/dtypes nor the CB allocation or public routing gate.
+
 The output page count is recomputed from the **repeated logical shape**, then rounded to tiles. It is not `input_tiles * repeats`. For example, H=8 repeated four times gives H=32 and still one tile row. The same geometry helper is used by the support gate and dispatch helper; it checks canonical padding and overflow before allocation.
 
 CB staging per core is bounded:
@@ -84,21 +86,20 @@ On the observed 8×9 grid, output-page splitting assigns the width case's 64 til
 
 ### Completed locally
 
-- Compile and execute the **actual reader source**, not a Python translation, for 24 compile-time variants: two element widths × two axes × six repeat counts (2, 3, 4, 7, 33, 127).
-- **6,024 geometry/data cases**, including face/tile boundaries, ragged shapes, multiple batches, uneven core partitions, the supplied width/prefill geometries, repeated calls with changed data, and poisoned input padding.
+- Compile and execute the **actual reader source**, not a Python translation, for 32 compile-time variants: two element widths × two axes × eight repeat counts (2, 3, 4, 7, 8, 16, 33, 127).
+- **8,032 geometry/data cases**, including face/tile boundaries, ragged shapes, multiple batches, uneven core partitions, the supplied width/prefill geometries, repeated calls with changed data, and poisoned input padding.
 - AddressSanitizer and UndefinedBehaviorSanitizer, `-Wall -Wextra -Werror`.
-- Guarded scratch/output allocations, delayed mock NOC reads until the barrier, batched writer backpressure/ring-wrap checks, raw special-value bit patterns, and exact padded-output comparison.
-- **39 passing host unittest methods**, including the actual-reader sweep, profiler signposts, alternated benchmark order, CLI preflight, old-checkout rejection, committed-descendant acceptance, simulation/debug-mode rejection, CSV aggregation and the readable report's commit/source checks.
-- Pinned formatting checks pass: Black 23.10.1 on nine Python files and clang-format 19.1.4 on modified C++ lines and the new reader. Python 3.10 grammar checks pass for eleven files; both hardware scripts pass Bash syntax and refuse execution on the local non-Linux machine.
-- The focused seven-file production/device-test patch was also applied to an archive of the exact base; all resulting files byte-matched the working tree. The branch already contains these changes, so do not reapply the earlier archive's `core.patch`.
+- Guarded scratch/output allocations, current-reservation checks on every write, delayed mock NoC reads until the barrier, batched writer backpressure/ring-wrap checks, raw special-value bit patterns, and exact padded-output comparison.
+- Mock access counters require exactly one store per output word, packed source loads for H and aligned W, and source-word reuse for aligned W. They are structural checks, **not device timing estimates**.
+- The host suite also covers profiler signposts, alternated benchmark order, CLI preflight, old-checkout rejection, committed-descendant acceptance, simulation/debug-mode rejection, CSV aggregation, report identity checks, environment isolation, and failure-stop behavior. `HOST_VALIDATION.json` and `HOST_VALIDATION.txt` record the current run's counts, hashes and formatting/syntax checks.
 
 These are **host mocks**, not official tt-emule or Tenstorrent hardware. They do not validate actual NoC transactions, the complete TTNN C++ build, physical allocator behavior, real cache rebinding, device compiler ABI, or speed. `HOST_VALIDATION.json` records the final source hash and results.
 
-### Authored, not executed here
+### Device evidence and pending rerun
 
-81 new parameterized device-test instances cover finite bitwise correctness, cache-hit input/output rebinding, NaN payloads/infinities/signed zero/subnormals, output-extent overflow and explicit L1-I/O refusal. Existing routing tests continue to check native fallback.
+The first 81 added device-test instances were included in the user's passing 135-test run at commit `8d601ab0ee2e7bd4383fd347b4ac6aecf820d912`. The packed-row revision adds 42 more instances: ragged/single-element W repeats, an R=16 general-path case, and special-value bit patterns for R=2/4/8. There are now 123 added instances relative to the pinned base; existing routing tests continue to check native fallback. **The revised reader and expanded device tests have not yet run on hardware.**
 
-The local environment is macOS without a TT device or Torch/TTNN runtime. No connected cloud browser was available. Consequently the Linux host build, device JIT, device tests, installed-package check, Wormhole/Blackhole performance, and model integration remain unverified.
+The local environment is macOS without a TT device or Torch/TTNN runtime. The user's first-run summary verifies that the original revision completed the Linux setup/build/JIT workflow on Wormhole, but does not validate the revised reader. Blackhole, installed-wheel packaging, project CI and model-level performance remain unverified.
 
 ## Hardware handoff: one bounded workflow
 
@@ -114,15 +115,19 @@ bash bounty-research/2026-09-20/setup_candidate_clone.sh
 
 Leave the original `$HOME/tt-metal` checkout and its Python environment alone. Git refuses to clone over an existing nonempty destination. The setup script also refuses to overwrite an existing `python_env`; use a genuinely new clone for initial preparation.
 
-The script verifies that the candidate descends from the pinned base, checks its sources/environment, initializes submodules, builds, creates a separate Python environment, and runs validation. Build and environment logs remain in the new checkout as `candidate_build.log` and `candidate_venv.log`. It does not reset the old source, overwrite its build/venv, clear global JIT caches, upgrade drivers/firmware, or post anything. A new environment/full build requires disk, network and the Linux build prerequisites in `INSTALLING.md`; missing prerequisites cause an error, not an automatic system upgrade. The complete Linux setup has not been executed here.
+The script verifies that the candidate descends from the pinned base, checks its sources/environment, initializes submodules, builds, creates a separate Python environment, and runs validation. Build and environment logs remain in the new checkout as `candidate_build.log` and `candidate_venv.log`. It does not reset the old source, overwrite its build/venv, clear global JIT caches, upgrade drivers/firmware, or post anything. A new environment/full build requires disk, network and the Linux build prerequisites in `INSTALLING.md`; missing prerequisites cause an error, not an automatic system upgrade. The user successfully completed this setup for the first candidate.
 
 Probe records contain both the pinned base and the actual candidate commit, plus source hashes. Summaries reject measurements from different commits, sources, runtimes or devices. Do not use a shallow clone that omits the pinned base's history.
 
-For an already prepared candidate checkout with its environment activated:
+For the already prepared candidate checkout, **do not clone again or rerun setup**:
 
 ```bash
+cd "$HOME/tt-metal-repeat-direct" &&
+git pull --ff-only &&
 bash bounty-research/2026-09-20/run_candidate_validation.sh --build
 ```
+
+The runner activates that checkout's own `python_env`, uses its absolute Python executable and build libraries, and replaces inherited source paths. It is safe to launch from a shell still displaying the original checkout's `(python_env)` prompt. Activation stays inside the child script and does not change the parent shell. `git pull --ff-only` does not discard local edits or rewrite history. Keep `/tmp/tt-repeat-direct.xLpGzF` as the original run; the runner creates a different results directory for every rerun.
 
 The runner stops on failure, preserves logs, and performs:
 
@@ -149,4 +154,4 @@ python bounty-research/2026-09-20/summarize_repeat_capture.py /path/to/ops_perf_
 - Complete project CI/package/license-header checks and human code review; the host harness does not replace them.
 - Obtain issue/scope approval and, if seeking payment, the separate required bounty assignment/eligibility. Neither has been established by these results.
 
-The defensible outcome now is **a concrete, locally verified candidate and a reproducible hardware validation package**, not an acceptance or payment guarantee.
+The defensible outcome now is **one correctness-validated Wormhole candidate with mixed performance, plus a locally checked packed-row revision ready for another hardware run**, not an acceptance or payment guarantee.

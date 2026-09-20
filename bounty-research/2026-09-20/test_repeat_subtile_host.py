@@ -24,7 +24,9 @@ class RepeatSubtileHostTest(unittest.TestCase):
         results = []
         with tempfile.TemporaryDirectory(prefix="tt-repeat-subtile-") as temporary:
             executable = Path(temporary) / "reader_test"
-            for element_bytes, repeat_height, repeats in itertools.product((2, 4), (0, 1), (2, 3, 4, 7, 33, 127)):
+            for element_bytes, repeat_height, repeats in itertools.product(
+                (2, 4), (0, 1), (2, 3, 4, 7, 8, 16, 33, 127)
+            ):
                 with self.subTest(element_bytes=element_bytes, repeat_height=repeat_height, repeats=repeats):
                     command = [
                         compiler,
@@ -51,6 +53,9 @@ class RepeatSubtileHostTest(unittest.TestCase):
                     self.assertEqual(tested.returncode, 0, tested.stdout + tested.stderr)
                     result = json.loads(tested.stdout)
                     self.assertEqual(result["cases"], 251)
+                    self.assertEqual(
+                        result["output_l1_word_writes"], result["checked_padded_elements"] * element_bytes // 4
+                    )
                     results.append(result)
                     print(
                         json.dumps(
@@ -63,7 +68,7 @@ class RepeatSubtileHostTest(unittest.TestCase):
                         ),
                         flush=True,
                     )
-        self.assertEqual(len(results), 24)
+        self.assertEqual(len(results), 32)
         self.assertEqual(hashlib.sha256(kernel.read_bytes()).hexdigest(), digest)
         print(
             json.dumps(
@@ -74,6 +79,9 @@ class RepeatSubtileHostTest(unittest.TestCase):
                     "cases": sum(result["cases"] for result in results),
                     "core_invocations": sum(result["core_invocations"] for result in results),
                     "checked_padded_elements": sum(result["checked_padded_elements"] for result in results),
+                    "source_l1_halfword_reads": sum(result["source_l1_halfword_reads"] for result in results),
+                    "source_l1_word_reads": sum(result["source_l1_word_reads"] for result in results),
+                    "output_l1_word_writes": sum(result["output_l1_word_writes"] for result in results),
                     "validation": "actual reader with guarded host mocks, ASan and UBSan; not device execution",
                 }
             ),

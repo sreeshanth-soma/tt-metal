@@ -10,6 +10,9 @@ uint64_t checked_elements = 0;
 uint64_t core_invocations = 0;
 uint64_t page_reads = 0;
 uint64_t secondary_reads = 0;
+uint64_t source_l1_halfword_reads = 0;
+uint64_t source_l1_word_reads = 0;
+uint64_t output_l1_word_writes = 0;
 
 uint64_t physical_index(uint32_t plane, uint32_t row, uint32_t col, uint32_t height, uint32_t width) {
     const uint32_t height_tiles = (height + 31) / 32;
@@ -101,6 +104,9 @@ void run_case(uint32_t planes, uint32_t height, uint32_t width, uint32_t workers
         context.check_complete();
         page_reads += context.source_reads;
         secondary_reads += context.second_slot_reads;
+        source_l1_halfword_reads += context.source_l1_halfword_reads;
+        source_l1_word_reads += context.source_l1_word_reads;
+        output_l1_word_writes += context.output_l1_word_writes;
         ++core_invocations;
         start_page += pages;
     }
@@ -150,6 +156,9 @@ int main() {
         std::cout << "{\"cases\":" << cases << ",\"core_invocations\":" << subtile_host::core_invocations
                   << ",\"checked_padded_elements\":" << subtile_host::checked_elements
                   << ",\"source_page_reads\":" << subtile_host::page_reads
+                  << ",\"source_l1_halfword_reads\":" << subtile_host::source_l1_halfword_reads
+                  << ",\"source_l1_word_reads\":" << subtile_host::source_l1_word_reads
+                  << ",\"output_l1_word_writes\":" << subtile_host::output_l1_word_writes
                   << ",\"second_slot_reads\":" << subtile_host::secondary_reads << "}\n";
         return 0;
     } catch (const std::exception& error) {
