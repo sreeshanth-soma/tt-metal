@@ -1,0 +1,73 @@
+{
+  "date": "2026-09-20",
+  "base_commit": "9173350554b616022b3aa7c4fbad33f13cb36aee",
+  "status": "local_validation_passed_hardware_validation_pending",
+  "submission_ready": false,
+  "automatic_subtile_routing": "disabled; candidate requires the existing private forced-codegen entry",
+  "host_environment": {
+    "platform": "macOS arm64",
+    "python": "3.13",
+    "compiler": "Apple clang 21.0.0 (clang-2100.1.1.101)",
+    "compiler_target": "arm64-apple-darwin25.5.0",
+    "tenstorrent_device_available": false,
+    "connected_cloud_executor_available": false
+  },
+  "unittest": {
+    "command": "python3 -m unittest discover -s bounty-research/2026-09-20 -p 'test_*.py' -v",
+    "tests": 39,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 84.061,
+    "log": "HOST_VALIDATION.txt",
+    "log_sha256": "f2a5c4a31a307e060e88999c3f6566b7edebded3586a36cba81735fa9e75c866"
+  },
+  "actual_reader_host_test": {
+    "source": "ttnn/cpp/ttnn/operations/data_movement/repeat_interleave/codegen/kernels/reader_repeat_interleave_subtile.cpp",
+    "source_sha256": "425d81dc8450185e131a3b9a69c62899b15c16841dd2733474969051bf3e30ee",
+    "compile_time_variants": 24,
+    "cases": 6024,
+    "mock_core_invocations": 83754,
+    "checked_padded_elements": 896937984,
+    "repeat_counts": [2, 3, 4, 7, 33, 127],
+    "element_bytes": [2, 4],
+    "axes": ["height", "width"],
+    "sanitizers": ["AddressSanitizer", "UndefinedBehaviorSanitizer"],
+    "warning_flags": ["-Wall", "-Wextra", "-Werror"],
+    "scope": "Actual reader compiled against guarded host mocks, delayed mock NoC reads and a batched writer model. Not official tt-emule or device execution."
+  },
+  "format_and_syntax": {
+    "black": {"version": "23.10.1", "checked_files": 9, "result": "pass"},
+    "clang_format": {"version": "19.1.4", "scope": "modified tracked C++ lines and the complete new reader", "result": "pass"},
+    "git_diff_check": "pass",
+    "python_3_10_grammar": {"checked_files": 11, "result": "pass"},
+    "bash_syntax": {"checked_scripts": 2, "scripts": ["setup_candidate_clone.sh", "run_candidate_validation.sh"], "result": "pass"},
+    "non_linux_hardware_workflow_refusal": {"checked_scripts": 2, "expected_exit_code": 2, "result": "pass"}
+  },
+  "patch_replay": {
+    "scope": "Earlier standalone seven-file source patch, before committing the development branch; no patch application is needed after cloning the branch",
+    "sha256": "d3452446fea98c68358d1e4f8d924a5cc151b97bf95f55ab7f52cb6c8f48d8e9",
+    "result": "git apply --check and application to git-archived clean base passed; all seven resulting files byte-match the working tree",
+    "files": 7
+  },
+  "source_sha256": {
+    "ttnn/cpp/ttnn/operations/data_movement/repeat_interleave/repeat_interleave.cpp": "5a8434562a55c3c084353c2da034b666361f6751d1b79589f7e75d93691218ad",
+    "ttnn/cpp/ttnn/operations/data_movement/repeat_interleave/codegen/repeat_interleave_codegen_supported.cpp": "ea15df04fbf4b5abde806ba03b16899663c5f0b8be38bbf65465e0f24811b95e",
+    "ttnn/cpp/ttnn/operations/data_movement/repeat_interleave/codegen/repeat_interleave_codegen_supported.hpp": "766a4ebcef4e53330cf2c9ba7a34c1485ae370b8346c742dc376dafac9cac934",
+    "ttnn/cpp/ttnn/operations/data_movement/repeat_interleave/codegen/repeat_interleave_codegen_program_factory.cpp": "8cc87bcf617cf4446be79a32eece9a2b95e8a6cd35516e2073222c2245ae0fbb",
+    "ttnn/cpp/ttnn/operations/data_movement/repeat_interleave/codegen/kernels/reader_repeat_interleave_subtile.cpp": "425d81dc8450185e131a3b9a69c62899b15c16841dd2733474969051bf3e30ee",
+    "tests/ttnn/unit_tests/operations/data_movement/test_repeat_interleave.py": "1734d0fe4ea91d185b7817fdb08e4d4b92aebe2a916581b0292857999e0cbe4c",
+    "tests/ttnn/nightly/unit_tests/operations/data_movement/test_repeat_interleave_codegen_routing.py": "fbc9358564118ff12187d43a59f8c9bc242edc4c3dd2173e17bc04993131d103"
+  },
+  "device_test_instances_authored_not_run": 81,
+  "not_validated": [
+    "Full Linux TTNN host build",
+    "Tenstorrent device compiler and actual NoC/CB execution",
+    "Physical allocation and real program-cache rebinding",
+    "Device correctness tests and installed JIT kernel availability",
+    "Wormhole or Blackhole candidate performance",
+    "End-to-end model performance",
+    "Complete remote preparation and validation workflow",
+    "Project CI, license-header checks and maintainer approval"
+  ]
+}

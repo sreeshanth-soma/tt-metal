@@ -31,7 +31,6 @@ _DTYPE_IDS = ["bfloat16", "float32", "int32"]
 _ROUTING = [
     # within-stick (last W) dim deferred for RM path
     ([1, 1, 32, 64], {"repeats": 2, "dim": 3}, ttnn.ROW_MAJOR_LAYOUT),
-    # sub-tile (last two) dims deferred for TILE path
     ([1, 1, 32, 64], {"repeats": 2, "dim": 3}, ttnn.TILE_LAYOUT),
     ([1, 1, 64, 32], {"repeats": 2, "dim": 2}, ttnn.TILE_LAYOUT),
     ([1, 32, 64], {"repeats": 2, "dim": 1}, ttnn.TILE_LAYOUT),
@@ -42,7 +41,6 @@ _ROUTING = [
 _ROUTING_IDS = [
     # within-stick (last W) dim deferred for RM path
     "[1, 1, 32, 64]|dim=3&repeats=2|row_major",
-    # sub-tile (last two) dims deferred for TILE path
     "[1, 1, 32, 64]|dim=3&repeats=2|tile",
     "[1, 1, 64, 32]|dim=2&repeats=2|tile",
     "[1, 32, 64]|dim=1&repeats=2|tile",
@@ -121,14 +119,35 @@ def test_forced_codegen_refuses_a_wide_rm_case_that_exceeds_l1(device, expect_er
 
 
 def test_forced_codegen_refuses_out_of_scope_case(device, expect_error):
-    # The forced leg exists to be compared against native, so it has to fail loudly outside its
-    # support scope: if it fell back, every bit-exactness result gathered through it would really be
-    # native-vs-native. A TILE repeat needs a dim above the two the tile subdivides, and dim 3 is
-    # not.
     x = _make_input([1, 1, 32, 64], ttnn.bfloat16)
-    xt = ttnn.from_torch(x, dtype=ttnn.bfloat16, layout=ttnn.TILE_LAYOUT, device=device)
+    xt = ttnn.from_torch(x, dtype=ttnn.bfloat16, layout=ttnn.ROW_MAJOR_LAYOUT, device=device)
     with expect_error(RuntimeError, "does not support"):
         _force_codegen(xt, 2, 3)
+
+
+@pytest.mark.parametrize("dim", [-2, -1])
+def test_forced_codegen_refuses_subtile_extent_overflow(device, expect_error, dim):
+    source = _make_input([1, 1, 33, 33], ttnn.bfloat16)
+    input_tensor = ttnn.from_torch(source, dtype=ttnn.bfloat16, layout=ttnn.TILE_LAYOUT, device=device)
+    with expect_error(RuntimeError, "does not support"):
+        _force_codegen(input_tensor, 0xFFFFFFFF, dim)
+
+
+@pytest.mark.parametrize(
+    "input_memory,output_memory",
+    [
+        (ttnn.L1_MEMORY_CONFIG, ttnn.DRAM_MEMORY_CONFIG),
+        (ttnn.DRAM_MEMORY_CONFIG, ttnn.L1_MEMORY_CONFIG),
+        (ttnn.L1_MEMORY_CONFIG, ttnn.L1_MEMORY_CONFIG),
+    ],
+)
+def test_forced_codegen_refuses_subtile_l1_io(device, expect_error, input_memory, output_memory):
+    source = _make_input([1, 2, 32, 64], ttnn.bfloat16)
+    input_tensor = ttnn.from_torch(
+        source, dtype=ttnn.bfloat16, layout=ttnn.TILE_LAYOUT, device=device, memory_config=input_memory
+    )
+    with expect_error(RuntimeError, "does not support"):
+        _force_codegen(input_tensor, 2, -1, memory_config=output_memory)
 
 
 # Hand-added: tile-geometry routing, over both axes a tile varies on. An off-default *shape* changes

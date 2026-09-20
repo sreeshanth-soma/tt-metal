@@ -1,0 +1,147 @@
+{
+  "provenance": "Selected fields transcribed from user-supplied terminal output, not a downloaded original JSONL or local hardware execution.",
+  "source_output_path": "/tmp/tt-bounty-matrix-v2-20260920-114403.jsonl",
+  "utc": "2026-09-20T11:44:03.675619+00:00",
+  "git_head": "9f9cd4fd590f4b606bd0981a4fe0b6403eb38ec9",
+  "research_commit": "9173350554b616022b3aa7c4fbad33f13cb36aee",
+  "probe_revision": "repeat-selector-batches-v2",
+  "probe_sha256": "d3e4967e87a48cca0b9004408fa0b0ab53237dd1422d5d712af4b4ca0c5e679b",
+  "architecture": "Arch.WORMHOLE_B0",
+  "compute_grid": [8, 9],
+  "dtype": "bf16",
+  "warmup": 5,
+  "samples_per_implementation": 31,
+  "program_cache_enabled": true,
+  "timing_scope": "synchronized host-to-completion operation latency; not isolated device cycles",
+  "selector_setup_excluded_from_warm_timings": true,
+  "suite_finished": true,
+  "device_closed": true,
+  "cases": [
+    {
+      "name": "aligned_h",
+      "shape": [1, 4, 64, 128],
+      "dimension": 2,
+      "repeats": 2,
+      "output_elements": 65536,
+      "input_roundtrip_exact": true,
+      "selector_shape": [1, 4, 128, 64],
+      "selector_logical_elements": 32768,
+      "public_repeat": {
+        "exact_before_timing": true,
+        "exact_after_timing": true,
+        "median_us": 446.988,
+        "samples_us": [461.369, 458.979, 523.688, 491.908, 436.528, 453.408, 458.288, 453.129, 417.869, 430.338, 448.938, 439.899, 435.158, 435.718, 432.129, 426.629, 443.618, 449.198, 418.369, 446.988, 469.178, 458.398, 424.549, 465.849, 464.878, 454.028, 418.479, 450.519, 435.428, 441.648, 420.129]
+      },
+      "selector_matmul": {
+        "exact_before_timing": true,
+        "exact_after_timing": true,
+        "median_us": 194.719,
+        "samples_us": [208.749, 230.86, 200.6, 188.73, 224.469, 182.459, 188.16, 180.1, 218.949, 183.069, 195.99, 193.27, 204.699, 198.469, 190.35, 208.01, 193.549, 179.849, 189.34, 203.229, 196.129, 182.299, 205.46, 192.14, 194.719, 179.399, 214.13, 183.7, 201.899, 182.739, 198.48]
+      }
+    },
+    {
+      "name": "aligned_w",
+      "shape": [1, 4, 64, 128],
+      "dimension": 3,
+      "repeats": 2,
+      "output_elements": 65536,
+      "input_roundtrip_exact": true,
+      "selector_shape": [1, 4, 128, 256],
+      "selector_logical_elements": 131072,
+      "public_repeat": {
+        "exact_before_timing": true,
+        "exact_after_timing": true,
+        "median_us": 573.528,
+        "samples_us": [583.918, 591.488, 582.428, 737.647, 651.267, 655.328, 632.698, 708.597, 631.248, 659.807, 586.018, 587.288, 580.738, 579.148, 535.078, 561.018, 549.988, 561.038, 562.188, 558.418, 559.498, 573.528, 564.668, 568.358, 551.188, 538.768, 565.468, 547.448, 578.398, 568.048, 572.368]
+      },
+      "selector_matmul": {
+        "exact_before_timing": true,
+        "exact_after_timing": true,
+        "median_us": 190.849,
+        "samples_us": [191.379, 178.159, 191.169, 185.349, 216.139, 200.939, 201.669, 190.849, 201.419, 189.399, 185.969, 176.709, 199.13, 192.95, 219.729, 184.699, 196.809, 198.409, 185.48, 175.33, 192.649, 174.969, 198.169, 182.019, 206.93, 181.78, 189.289, 202.36, 189.639, 180.699, 189.72]
+      }
+    },
+    {
+      "name": "gva_decode_h",
+      "shape": [1, 1, 8, 64],
+      "dimension": 2,
+      "repeats": 4,
+      "output_elements": 2048,
+      "input_roundtrip_exact": true,
+      "selector_shape": [1, 1, 32, 8],
+      "selector_logical_elements": 256,
+      "public_repeat": {
+        "exact_before_timing": true,
+        "exact_after_timing": true,
+        "median_us": 416.019,
+        "samples_us": [422.569, 445.238, 390.759, 411.779, 461.518, 428.408, 389.099, 391.298, 422.688, 450.649, 382.559, 388.248, 436.419, 446.648, 382.058, 387.529, 413.398, 444.858, 376.209, 405.598, 419.808, 430.809, 383.308, 383.859, 440.739, 420.958, 416.019, 384.759, 441.328, 423.419, 381.809]
+      },
+      "selector_matmul": {
+        "exact_before_timing": true,
+        "exact_after_timing": true,
+        "median_us": 193.409,
+        "samples_us": [195.039, 180.019, 196.31, 259.61, 192.369, 198.719, 206.73, 190.67, 195.679, 183.559, 220.359, 194.599, 193.29, 185.39, 226.359, 190.999, 191.939, 193.219, 219.599, 189.24, 191.499, 180.81, 199.859, 194.049, 204.359, 184.239, 223.85, 192.33, 193.409, 180.949, 213.899]
+      }
+    },
+    {
+      "name": "gva_prefill_h",
+      "shape": [1, 128, 8, 64],
+      "dimension": 2,
+      "repeats": 4,
+      "output_elements": 262144,
+      "input_roundtrip_exact": true,
+      "selector_shape": [1, 128, 32, 8],
+      "selector_logical_elements": 32768,
+      "public_repeat": {
+        "exact_before_timing": true,
+        "exact_after_timing": true,
+        "median_us": 492.168,
+        "samples_us": [589.898, 493.229, 524.078, 492.468, 443.218, 505.158, 462.508, 2301.712, 536.468, 516.188, 459.318, 529.468, 572.788, 492.168, 486.838, 466.729, 515.239, 481.408, 450.748, 501.578, 449.118, 471.658, 517.818, 472.768, 447.718, 496.328, 452.708, 452.328, 520.858, 485.439, 466.529]
+      },
+      "selector_matmul": {
+        "exact_before_timing": true,
+        "exact_after_timing": true,
+        "median_us": 719.238,
+        "samples_us": [726.317, 735.718, 720.708, 712.698, 747.267, 714.957, 719.987, 710.808, 734.388, 722.067, 727.427, 710.047, 741.187, 713.977, 722.117, 711.058, 719.238, 711.268, 740.897, 715.897, 725.008, 714.548, 717.327, 708.357, 719.788, 719.598, 711.757, 711.877, 722.218, 713.068, 715.467]
+      }
+    },
+    {
+      "name": "ragged_w",
+      "shape": [1, 2, 37, 65],
+      "dimension": 3,
+      "repeats": 3,
+      "output_elements": 14430,
+      "input_roundtrip_exact": true,
+      "selector_shape": [1, 2, 65, 195],
+      "selector_logical_elements": 25350,
+      "public_repeat": {
+        "exact_before_timing": true,
+        "exact_after_timing": true,
+        "median_us": 569.518,
+        "samples_us": [579.858, 577.748, 543.528, 640.758, 595.677, 536.829, 569.518, 542.058, 589.258, 575.518, 578.548, 573.188, 531.728, 554.438, 546.689, 540.569, 563.398, 580.278, 574.408, 577.168, 540.178, 555.488, 565.278, 553.408, 573.568, 579.078, 540.958, 600.647, 533.158, 538.428, 595.008]
+      },
+      "selector_matmul": {
+        "exact_before_timing": true,
+        "exact_after_timing": true,
+        "median_us": 180.279,
+        "samples_us": [180.279, 164.869, 198.969, 168.999, 204.59, 173.43, 183.159, 204.229, 181.329, 170.999, 181.199, 172.049, 208.059, 173.119, 178.68, 206.65, 179.799, 168.28, 189.779, 171.919, 203.019, 179.379, 182.11, 191.669, 178.12, 167.84, 185.28, 171.77, 200.759, 188.779, 178.399]
+      }
+    },
+    {
+      "name": "outer_control",
+      "shape": [1, 8, 128, 64],
+      "dimension": 1,
+      "repeats": 4,
+      "output_elements": 262144,
+      "input_roundtrip_exact": true,
+      "selector_shape": null,
+      "selector_logical_elements": 0,
+      "public_repeat": {
+        "exact_before_timing": true,
+        "exact_after_timing": true,
+        "median_us": 447.199,
+        "samples_us": [430.479, 502.879, 435.619, 493.448, 427.998, 473.608, 437.598, 443.258, 427.619, 443.579, 445.298, 462.508, 447.318, 444.908, 458.459, 447.199, 470.139, 446.789, 487.818, 436.428, 485.628, 434.038, 466.188, 472.598, 435.208, 487.438, 435.778, 460.679, 460.439, 468.499, 437.079]
+      }
+    }
+  ]
+}

@@ -36,6 +36,9 @@ constexpr uint32_t kSeqRepeatInterleave = 9;
 // Shared by several data_movement ops, hence common/ rather than this op's own kernels dir.
 constexpr const char* kTileReaderSrc =
     "ttnn/cpp/ttnn/operations/data_movement/common/kernels/codegen/reader_tile_interleaved_unified.cpp";
+constexpr const char* kSubtileReaderSrc =
+    "ttnn/cpp/ttnn/operations/data_movement/repeat_interleave/codegen/kernels/"
+    "reader_repeat_interleave_subtile.cpp";
 constexpr const char* kWriterSrc =
     "ttnn/cpp/ttnn/operations/data_movement/common/kernels/codegen/writer_interleaved.cpp";
 constexpr const char* kRmReaderSrc =
@@ -92,10 +95,11 @@ ProgramDescriptor RepeatInterleaveCodegenProgramFactory::create_descriptor(
     ProgramDescriptor desc;
 
     if (input.layout() == Layout::TILE) {
-        // TILE outer-dim path: unified reader on the REPEAT_INTERLEAVE sequencer + the shared
-        // interleaved writer. The CB slot is one tile whatever the shape, so unlike the RM branch
-        // below its footprint needs no L1 bound.
+        namespace ri_codegen = ttnn::operations::data_movement::repeat_interleave_codegen;
         constexpr uint32_t cb_id = CBIndex::c_0;
+        constexpr uint32_t scratch_cb_id = CBIndex::c_1;
+        static_assert(kRiCbDepth == ri_codegen::kSubtileOutputCbPages);
+        const bool subtile = operation_attributes.rep_dim >= kRepDimPadRank - 2;
         const auto out_data_format = datatype_to_dataformat_converter(output.dtype());
         const uint32_t cb_page_size = tile_size(out_data_format);
 
@@ -109,14 +113,33 @@ ProgramDescriptor RepeatInterleaveCodegenProgramFactory::create_descriptor(
             }}},
         });
 
+        if (subtile) {
+            desc.cbs.push_back(CBDescriptor{
+                .total_size = ri_codegen::kSubtileScratchPages * cb_page_size,
+                .core_ranges = all_cores,
+                .format_descriptors = {{CBFormatDescriptor{
+                    .buffer_index = scratch_cb_id,
+                    .data_format = out_data_format,
+                    .page_size = cb_page_size,
+                }}},
+            });
+        }
+
         KernelDescriptor reader_desc;
-        reader_desc.kernel_source = kTileReaderSrc;
+        reader_desc.kernel_source = subtile ? kSubtileReaderSrc : kTileReaderSrc;
         reader_desc.core_ranges = all_cores;
         TensorAccessorArgs(*in_buffer).append_to(reader_desc.compile_time_args);
-        // reader_tile_interleaved_unified.cpp reads "src_page_pitch" unconditionally for every
-        // seq_id (not just the ones that override it); 0 keeps the accessor's own page size.
-        reader_desc.named_compile_time_args = {
-            {"seq_id", kSeqRepeatInterleave}, {"cb_id", cb_id}, {"batch", kRiReadBatch}, {"src_page_pitch", 0}};
+        if (subtile) {
+            reader_desc.named_compile_time_args = {
+                {"cb_id", cb_id},
+                {"scratch_cb_id", scratch_cb_id},
+                {"repeat_height", operation_attributes.rep_dim == kRepDimPadRank - 2},
+                {"repeats", operation_attributes.num_repeats},
+                {"element_bytes", input.element_size()}};
+        } else {
+            reader_desc.named_compile_time_args = {
+                {"seq_id", kSeqRepeatInterleave}, {"cb_id", cb_id}, {"batch", kRiReadBatch}, {"src_page_pitch", 0}};
+        }
         reader_desc.config = ReaderConfigDescriptor{};
 
         const uint32_t out_page_size = static_cast<uint32_t>(out_buffer->aligned_page_size());
@@ -129,14 +152,26 @@ ProgramDescriptor RepeatInterleaveCodegenProgramFactory::create_descriptor(
         writer_desc.config = WriterConfigDescriptor{};
 
         for (const auto& work : layout) {
-            reader_desc.emplace_runtime_args(
-                work.core,
-                {in_buffer,
-                 work.num_pages,
-                 work.start_page,
-                 operation_attributes.num_repeats,
-                 operation_attributes.lower_pages,
-                 operation_attributes.rep_dim_pages});
+            if (subtile) {
+                reader_desc.emplace_runtime_args(
+                    work.core,
+                    {in_buffer,
+                     work.num_pages,
+                     work.start_page,
+                     input.padded_shape()[-2] / tt::constants::TILE_HEIGHT,
+                     input.padded_shape()[-1] / tt::constants::TILE_WIDTH,
+                     output.logical_shape()[-2],
+                     output.logical_shape()[-1]});
+            } else {
+                reader_desc.emplace_runtime_args(
+                    work.core,
+                    {in_buffer,
+                     work.num_pages,
+                     work.start_page,
+                     operation_attributes.num_repeats,
+                     operation_attributes.lower_pages,
+                     operation_attributes.rep_dim_pages});
+            }
             writer_desc.emplace_runtime_args(work.core, {out_buffer, work.num_pages, work.start_page});
         }
 

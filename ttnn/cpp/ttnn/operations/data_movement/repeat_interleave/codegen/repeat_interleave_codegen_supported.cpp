@@ -5,7 +5,9 @@
 #include "ttnn/operations/data_movement/repeat_interleave/codegen/repeat_interleave_codegen_supported.hpp"
 
 #include <algorithm>
+#include <limits>
 
+#include <tt-metalium/buffer.hpp>
 #include <tt-metalium/constants.hpp>
 #include <tt-metalium/hal.hpp>
 #include <tt-metalium/math.hpp>
@@ -27,6 +29,34 @@ uint32_t page_alignment(const MemoryConfig& memory_config) {
 }
 
 }  // namespace
+
+std::optional<uint32_t> subtile_output_pages(const Tensor& input, uint32_t repeats, uint32_t dim) {
+    const auto& shape = input.logical_shape();
+    const auto& padded_shape = input.padded_shape();
+    const uint32_t rank = shape.rank();
+    if (rank < 2 || rank > 4 || dim < rank - 2 || dim >= rank || repeats < 2) {
+        return std::nullopt;
+    }
+
+    constexpr uint64_t max_extent = std::numeric_limits<uint32_t>::max();
+    uint64_t output_pages = 1;
+    for (uint32_t axis = 0; axis < rank; ++axis) {
+        const uint64_t input_extent = shape[axis];
+        const uint64_t output_extent = input_extent * (axis == dim ? repeats : 1);
+        if (input_extent == 0 || output_extent > max_extent) {
+            return std::nullopt;
+        }
+        const uint32_t alignment = axis + 2 >= rank ? tt::constants::TILE_HEIGHT : 1;
+        const uint64_t expected_padding = ((input_extent + alignment - 1) / alignment) * alignment;
+        const uint64_t axis_pages = (output_extent + alignment - 1) / alignment;
+        if (padded_shape[axis] != expected_padding || axis_pages * alignment > max_extent ||
+            output_pages > max_extent / axis_pages) {
+            return std::nullopt;
+        }
+        output_pages *= axis_pages;
+    }
+    return static_cast<uint32_t>(output_pages);
+}
 
 RmCbBudget rm_cb_budget(const Tensor& input, const std::optional<MemoryConfig>& output_mem_config) {
     const auto& shape = input.logical_shape();
@@ -112,9 +142,18 @@ bool supported_by_codegen(
             tile.get_transpose_within_face() || tile.get_transpose_of_faces()) {
             return false;
         }
-        // The last two dims subdivide a 32x32 tile, and the reader replicates whole tile pages:
-        // page replication is not torch's element-level interleave along H or W.
-        return nd < ndim - 2;
+        if (nd < ndim - 2) {
+            return true;
+        }
+        const auto& out_config = output_mem_config.value_or(input.memory_config());
+        if (input.memory_config().buffer_type() != tt::tt_metal::BufferType::DRAM ||
+            out_config.buffer_type() != tt::tt_metal::BufferType::DRAM ||
+            !subtile_output_pages(input, repeats, nd).has_value()) {
+            return false;
+        }
+        const uint32_t tile_bytes = tt::constants::TILE_HW * input.element_size();
+        return input.buffer()->aligned_page_size() == tile_bytes &&
+               get_max_l1_space(input) >= (kSubtileOutputCbPages + kSubtileScratchPages) * tile_bytes;
     }
 
     if (input.layout() == Layout::ROW_MAJOR) {
@@ -139,15 +178,9 @@ bool supported_by_codegen(
 }
 
 bool is_demoted(
-    const Tensor& /*input*/,
-    uint32_t /*repeats*/,
-    int32_t /*dim*/,
-    const std::optional<MemoryConfig>& /*output_mem_config*/) {
-    // No shape is perf-demoted: every configuration supported_by_codegen() admits beats the native
-    // composite on device time on both wormhole_b0 and blackhole. The gate stays in the routing
-    // expression as the one place a genuine device regression belongs, expressed as a condition over
-    // tensor attributes.
-    return false;
+    const Tensor& input, uint32_t /*repeats*/, int32_t dim, const std::optional<MemoryConfig>& /*output_mem_config*/) {
+    const uint32_t rank = input.logical_shape().rank();
+    return input.layout() == Layout::TILE && rank >= 2 && normalize_dim(dim, rank) >= rank - 2;
 }
 
 }  // namespace ttnn::operations::data_movement::repeat_interleave_codegen

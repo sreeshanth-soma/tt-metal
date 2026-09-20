@@ -1,0 +1,145 @@
+{
+  "provenance": "Selected sample-region fields transcribed from the user-pasted Tracy CSV. Profiled host samples come from the preceding user-pasted probe output. This is not the original CSV or a local hardware run.",
+  "source_csv_path": "/tmp/tt-repeat-profile.AJAB2B/aligned_w/reports/2026_09_20_12_03_27/ops_perf_results_2026_09_20_12_03_27.csv",
+  "source_probe_path": "/tmp/tt-repeat-profile.AJAB2B/aligned_w/probe.jsonl",
+  "case": "aligned_w",
+  "input_shape": [1, 4, 64, 128],
+  "dimension": 3,
+  "repeats": 2,
+  "dtype": "BFLOAT16",
+  "device_id": 0,
+  "device_arch": "wormhole_b0",
+  "included_phase": "sample",
+  "samples_per_implementation": 5,
+  "excluded_regions": ["initial correctness", "warmup", "post-timing correctness"],
+  "device_row_columns": [
+    "GLOBAL CALL COUNT", "OP CODE", "CORE COUNT",
+    "DEVICE KERNEL DURATION [ns]", "OP TO OP LATENCY [ns]"
+  ],
+  "sample_regions": [
+    {
+      "implementation": "public_repeat",
+      "iteration": 0,
+      "begin_host_ts_ns": 8138890704,
+      "end_host_ts_ns": 8139560842,
+      "device_rows": [
+        [25600, "TransposeDeviceOperation", 32, 2052, 294530],
+        [26624, "UntilizeCodegenDeviceOperation", 32, 3737, 84936],
+        [27648, "ConcatDeviceOperation", 72, 8031, 172249],
+        [28672, "TilizeDeviceOperation", 32, 4163, 102186],
+        [29696, "TransposeDeviceOperation", 64, 2516, 77864]
+      ]
+    },
+    {
+      "implementation": "selector_matmul",
+      "iteration": 0,
+      "begin_host_ts_ns": 8139645401,
+      "end_host_ts_ns": 8139898040,
+      "device_rows": [[30720, "MatmulDeviceOperation", 16, 14823, 337982]]
+    },
+    {
+      "implementation": "selector_matmul",
+      "iteration": 1,
+      "begin_host_ts_ns": 8139999730,
+      "end_host_ts_ns": 8140207389,
+      "device_rows": [[31744, "MatmulDeviceOperation", 16, 14684, 306933]]
+    },
+    {
+      "implementation": "public_repeat",
+      "iteration": 1,
+      "begin_host_ts_ns": 8140292409,
+      "end_host_ts_ns": 8141003576,
+      "device_rows": [
+        [32768, "TransposeDeviceOperation", 32, 2070, 240071],
+        [33792, "UntilizeCodegenDeviceOperation", 32, 3574, 75683],
+        [34816, "ConcatDeviceOperation", 72, 8163, 171197],
+        [35840, "TilizeDeviceOperation", 32, 3991, 132326],
+        [36864, "TransposeDeviceOperation", 64, 2609, 89808]
+      ]
+    },
+    {
+      "implementation": "public_repeat",
+      "iteration": 2,
+      "begin_host_ts_ns": 8141091286,
+      "end_host_ts_ns": 8141749343,
+      "device_rows": [
+        [37888, "TransposeDeviceOperation", 32, 2110, 297666],
+        [38912, "UntilizeCodegenDeviceOperation", 32, 3696, 75602],
+        [39936, "ConcatDeviceOperation", 72, 8016, 168698],
+        [40960, "TilizeDeviceOperation", 32, 3677, 100660],
+        [41984, "TransposeDeviceOperation", 64, 2550, 77063]
+      ]
+    },
+    {
+      "implementation": "selector_matmul",
+      "iteration": 2,
+      "begin_host_ts_ns": 8141840083,
+      "end_host_ts_ns": 8142074472,
+      "device_rows": [[43008, "MatmulDeviceOperation", 16, 14668, 340804]]
+    },
+    {
+      "implementation": "selector_matmul",
+      "iteration": 3,
+      "begin_host_ts_ns": 8142164741,
+      "end_host_ts_ns": 8142389230,
+      "device_rows": [[44032, "MatmulDeviceOperation", 16, 14826, 293102]]
+    },
+    {
+      "implementation": "public_repeat",
+      "iteration": 3,
+      "begin_host_ts_ns": 8142477900,
+      "end_host_ts_ns": 8143194017,
+      "device_rows": [
+        [45056, "TransposeDeviceOperation", 32, 2249, 263487],
+        [46080, "UntilizeCodegenDeviceOperation", 32, 3655, 77694],
+        [47104, "ConcatDeviceOperation", 72, 7984, 194313],
+        [48128, "TilizeDeviceOperation", 32, 3737, 112841],
+        [49152, "TransposeDeviceOperation", 64, 2603, 97605]
+      ]
+    },
+    {
+      "implementation": "public_repeat",
+      "iteration": 4,
+      "begin_host_ts_ns": 8143273437,
+      "end_host_ts_ns": 8143895204,
+      "device_rows": [
+        [50176, "TransposeDeviceOperation", 32, 1984, 274969],
+        [51200, "UntilizeCodegenDeviceOperation", 32, 3754, 69902],
+        [52224, "ConcatDeviceOperation", 72, 8213, 150459],
+        [53248, "TilizeDeviceOperation", 32, 3832, 94951],
+        [54272, "TransposeDeviceOperation", 64, 2614, 90769]
+      ]
+    },
+    {
+      "implementation": "selector_matmul",
+      "iteration": 4,
+      "begin_host_ts_ns": 8143973424,
+      "end_host_ts_ns": 8144181163,
+      "device_rows": [[55296, "MatmulDeviceOperation", 16, 14998, 301435]]
+    }
+  ],
+  "profiled_host_samples_us": {
+    "public_repeat": [654.497, 701.518, 648.598, 706.627, 611.198],
+    "selector_matmul": [243.369, 198.929, 225.439, 216.119, 199.069]
+  },
+  "derived_summary": {
+    "method": "Sum DEVICE KERNEL DURATION [ns] within each complete sample region, then take the median across five iterations. Do not sum per-core or per-RISC durations. Internal op-to-op latency excludes the first device row of each region.",
+    "public_kernel_sums_ns": [20499, 20407, 20049, 20228, 20397],
+    "selector_kernel_sums_ns": [14823, 14684, 14668, 14826, 14998],
+    "public_kernel_sum_median_us": 20.397,
+    "selector_kernel_sum_median_us": 14.823,
+    "kernel_sum_median_ratio": 1.3760372394252176,
+    "public_internal_op_to_op_latency_sums_ns": [437235, 469014, 422023, 482453, 406081],
+    "public_internal_op_to_op_latency_sum_median_us": 437.235,
+    "public_profiled_host_median_us": 654.497,
+    "selector_profiled_host_median_us": 216.119,
+    "profiled_host_median_ratio": 3.0284102739694334
+  },
+  "interpretation_limits": [
+    "Kernel-duration sums exclude gaps and are not full-call elapsed latency.",
+    "Host signpost spans are not identical to the probe's timed intervals.",
+    "Large between-operation latencies do not isolate Python, dispatch, synchronization, allocation, or profiler costs.",
+    "Selector preparation is excluded; this diagnostic is not a production replacement or a general speedup guarantee.",
+    "No prefill CSV, current-main hardware validation, or production-model trace is included."
+  ]
+}

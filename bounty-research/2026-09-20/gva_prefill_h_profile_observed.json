@@ -1,0 +1,153 @@
+{
+  "provenance": "Selected sample-region fields transcribed from the user-pasted Tracy CSV. Profiled host samples come from the preceding user-pasted probe output. This is not the original CSV or a local hardware run.",
+  "source_csv_path": "/tmp/tt-repeat-profile.AJAB2B/gva_prefill_h/reports/2026_09_20_12_03_40/ops_perf_results_2026_09_20_12_03_40.csv",
+  "source_probe_path": "/tmp/tt-repeat-profile.AJAB2B/gva_prefill_h/probe.jsonl",
+  "reported_checkout": "9f9cd4fd590f4b606bd0981a4fe0b6403eb38ec9",
+  "case": "gva_prefill_h",
+  "input_shape": [1, 128, 8, 64],
+  "dimension": 2,
+  "repeats": 4,
+  "dtype": "BFLOAT16",
+  "device_id": 0,
+  "device_arch": "wormhole_b0",
+  "available_worker_core_count": 72,
+  "included_phase": "sample",
+  "samples_per_implementation": 5,
+  "excluded_regions": ["initial correctness", "warmup", "post-timing correctness"],
+  "selected_matmul_program": {
+    "type": "MatmulMultiCoreReuseMultiCast1DProgramConfig",
+    "compute_with_storage_grid_size": [8, 9],
+    "fuse_batch": 0,
+    "per_core_M": 1,
+    "per_core_N": 1,
+    "mcast_in0": 1,
+    "reported_core_count": 2,
+    "program_hash": "7258295530263453153",
+    "compute_kernel_hash": "bmm_large_block_zm_fused_bias_activation/2882612841438612044/"
+  },
+  "matmul_input_logical_shapes": [[1, 128, 32, 8], [1, 128, 8, 64]],
+  "matmul_input_padded_shapes": [[1, 128, 32, 32], [1, 128, 32, 64]],
+  "device_row_columns": [
+    "GLOBAL CALL COUNT", "OP CODE", "CORE COUNT",
+    "DEVICE KERNEL DURATION [ns]", "OP TO OP LATENCY [ns]",
+    "HOST START TS", "HOST END TS"
+  ],
+  "sample_regions": [
+    {
+      "implementation": "public_repeat",
+      "iteration": 0,
+      "begin_host_ts_ns": 7207957315,
+      "end_host_ts_ns": 7212102798,
+      "device_rows": [
+        [17408, "UntilizeWithUnpaddingDeviceOperation", 64, 10764, 216739, 7208047685, 7208051805],
+        [18432, "ConcatDeviceOperation", 72, 28518, 96270, 7208176294, 7208180444],
+        [19456, "TilizeDeviceOperation", 64, 9813, 69282, 7208263774, 7208267394]
+      ]
+    },
+    {
+      "implementation": "selector_matmul",
+      "iteration": 0,
+      "begin_host_ts_ns": 7212177448,
+      "end_host_ts_ns": 7212874945,
+      "device_rows": [[20480, "MatmulDeviceOperation", 2, 566326, 3925770, 7212278847, 7212284727]]
+    },
+    {
+      "implementation": "selector_matmul",
+      "iteration": 1,
+      "begin_host_ts_ns": 7212943015,
+      "end_host_ts_ns": 7213632082,
+      "device_rows": [[21504, "MatmulDeviceOperation", 2, 565366, 180159, 7213034264, 7213038844]]
+    },
+    {
+      "implementation": "public_repeat",
+      "iteration": 1,
+      "begin_host_ts_ns": 7213701871,
+      "end_host_ts_ns": 7214079110,
+      "device_rows": [
+        [22528, "UntilizeWithUnpaddingDeviceOperation", 64, 10615, 205064, 7213787431, 7213791901],
+        [23552, "ConcatDeviceOperation", 72, 28601, 97730, 7213918861, 7213922660],
+        [24576, "TilizeDeviceOperation", 64, 10062, 69561, 7213989440, 7214000940]
+      ]
+    },
+    {
+      "implementation": "public_repeat",
+      "iteration": 2,
+      "begin_host_ts_ns": 7214140020,
+      "end_host_ts_ns": 7214502738,
+      "device_rows": [
+        [25600, "UntilizeWithUnpaddingDeviceOperation", 64, 10813, 213252, 7214219249, 7214222939],
+        [26624, "ConcatDeviceOperation", 72, 28256, 86744, 7214343489, 7214347059],
+        [27648, "TilizeDeviceOperation", 64, 10211, 66281, 7214411138, 7214414248]
+      ]
+    },
+    {
+      "implementation": "selector_matmul",
+      "iteration": 2,
+      "begin_host_ts_ns": 7214572158,
+      "end_host_ts_ns": 7215279515,
+      "device_rows": [[28672, "MatmulDeviceOperation", 2, 566487, 223599, 7214688337, 7214694027]]
+    },
+    {
+      "implementation": "selector_matmul",
+      "iteration": 3,
+      "begin_host_ts_ns": 7215344255,
+      "end_host_ts_ns": 7216028672,
+      "device_rows": [[29696, "MatmulDeviceOperation", 2, 565617, 172337, 7215429554, 7215433544]]
+    },
+    {
+      "implementation": "public_repeat",
+      "iteration": 3,
+      "begin_host_ts_ns": 7216097332,
+      "end_host_ts_ns": 7216484930,
+      "device_rows": [
+        [30720, "UntilizeWithUnpaddingDeviceOperation", 64, 10801, 199359, 7216181941, 7216185841],
+        [31744, "ConcatDeviceOperation", 72, 28620, 91241, 7216306541, 7216310091],
+        [32768, "TilizeDeviceOperation", 64, 9472, 67588, 7216375220, 7216378660]
+      ]
+    },
+    {
+      "implementation": "public_repeat",
+      "iteration": 4,
+      "begin_host_ts_ns": 7216554040,
+      "end_host_ts_ns": 7216916948,
+      "device_rows": [
+        [33792, "UntilizeWithUnpaddingDeviceOperation", 64, 11098, 240031, 7216636029, 7216639549],
+        [34816, "ConcatDeviceOperation", 72, 28639, 86198, 7216755899, 7216767239],
+        [35840, "TilizeDeviceOperation", 64, 10363, 76515, 7216834369, 7216837419]
+      ]
+    },
+    {
+      "implementation": "selector_matmul",
+      "iteration": 4,
+      "begin_host_ts_ns": 7216976218,
+      "end_host_ts_ns": 7217662425,
+      "device_rows": [[36864, "MatmulDeviceOperation", 2, 565154, 187065, 7217066788, 7217071428]]
+    }
+  ],
+  "profiled_host_samples_us": {
+    "public_repeat": [4134.093, 370.348, 355.018, 381.158, 356.099],
+    "selector_matmul": [691.137, 681.907, 701.717, 678.727, 680.198]
+  },
+  "derived_summary": {
+    "method": "Sum DEVICE KERNEL DURATION [ns] within each complete sample region, then take the median across all five iterations. Do not sum per-core or per-RISC durations. Internal op-to-op latency excludes the first device row of each region. No host outlier is removed.",
+    "public_kernel_sums_ns": [49095, 49278, 49280, 48893, 50100],
+    "selector_kernel_sums_ns": [566326, 565366, 566487, 565617, 565154],
+    "public_kernel_sum_median_us": 49.278,
+    "selector_kernel_sum_median_us": 565.617,
+    "selector_over_public_kernel_sum_median_ratio": 11.478083526117132,
+    "public_internal_op_to_op_latency_sums_ns": [165552, 167291, 153025, 158829, 162713],
+    "public_internal_op_to_op_latency_sum_median_us": 162.713,
+    "public_profiled_host_median_us": 370.348,
+    "selector_profiled_host_median_us": 681.907,
+    "selector_over_public_profiled_host_median_ratio": 1.8412601121107715,
+    "public_sample_0_last_host_op_end_to_region_end_us": 3835.404
+  },
+  "interpretation_limits": [
+    "Kernel-duration sums exclude gaps and are not full-call elapsed latency.",
+    "Reported core counts describe allocation, not measured FPU utilization or a guaranteed scaling factor.",
+    "The two-core matmul allocation and fuse_batch=0 configuration are clues, not proof that core allocation alone causes the full regression.",
+    "The public sample-0 host outlier remains in the data. Its precise cause is not isolated, and host operation end is not device completion.",
+    "Selector preparation is excluded; this diagnostic is not a production replacement or a general speedup guarantee.",
+    "No current-main hardware validation, improved matmul configuration, direct-repeat kernel, or production-model benchmark is included."
+  ]
+}

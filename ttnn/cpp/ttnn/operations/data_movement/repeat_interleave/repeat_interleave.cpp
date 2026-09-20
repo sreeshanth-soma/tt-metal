@@ -186,8 +186,6 @@ Tensor repeat_interleave_native(
                     : ttnn::to_memory_config(original_layout, mem_config);
 }
 
-// Rank-general TILE page geometry for the (outer, non-sub-tile) repeated axis, in the same page
-// space prim::repeat_codegen's kernels index.
 struct PageMap {
     uint32_t lower_pages;
     uint32_t rep_dim_pages;
@@ -198,6 +196,11 @@ struct PageMap {
 PageMap tile_page_map(const Tensor& input, uint32_t rep_dim, uint32_t num_repeats) {
     const auto& shape = input.logical_shape();
     const uint32_t ndim = shape.rank();
+    if (rep_dim >= ndim - 2) {
+        const auto output_pages = repeat_interleave_codegen::subtile_output_pages(input, num_repeats, rep_dim);
+        TT_FATAL(output_pages.has_value(), "repeat_interleave codegen: unsupported sub-tile page geometry");
+        return {0, 0, output_pages.value(), 0};
+    }
     const uint32_t ht = (shape[ndim - 2] + tt::constants::TILE_HEIGHT - 1) / tt::constants::TILE_HEIGHT;
     const uint32_t wt = (shape[ndim - 1] + tt::constants::TILE_WIDTH - 1) / tt::constants::TILE_WIDTH;
     std::vector<uint32_t> dim_pages;
@@ -276,8 +279,9 @@ ttnn::Tensor repeat_interleave_force_codegen(
         repeat_interleave_codegen::supported_by_codegen(input_a, repeats, dim, output_mem_config),
         "repeat_interleave_force_codegen invoked for a case the codegen path does not support "
         "(requires a device-resident, unsharded rank-2..4 bfloat16/float32/int32 input, an "
-        "interleaved output, repeats > 1, and a repeated dim outside the pages the layout "
-        "subdivides -- TILE defers the two sub-tile dims and requires the default 32x32 tile, "
+        "interleaved output and repeats > 1; TILE requires the default untransposed 32x32 tile, "
+        "and sub-tile H/W repeats require canonical padding, DRAM input/output, representable "
+        "output geometry and enough L1 for staging; "
         "ROW_MAJOR defers the within-stick last dim and needs a stick narrow enough for two CB "
         "slots in one core's L1). This entry never "
         "falls back to native, because a forced leg that quietly served native would make any "
@@ -295,8 +299,8 @@ Tensor repeat_interleave(
     namespace detail = operations::data_movement::detail;
     namespace repeat_interleave_codegen = operations::data_movement::repeat_interleave_codegen;
 
-    if (repeat_interleave_codegen::supported_by_codegen(input_a, repeats, dim, output_mem_config) &&
-        !repeat_interleave_codegen::is_demoted(input_a, repeats, dim, output_mem_config)) {
+    if (!repeat_interleave_codegen::is_demoted(input_a, repeats, dim, output_mem_config) &&
+        repeat_interleave_codegen::supported_by_codegen(input_a, repeats, dim, output_mem_config)) {
         return detail::repeat_interleave_via_codegen(input_a, repeats, dim, output_mem_config);
     }
     return detail::repeat_interleave_native(input_a, repeats, dim, output_mem_config);
