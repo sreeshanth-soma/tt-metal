@@ -99,11 +99,18 @@ def pytest_counts(path):
     return counts
 
 
-def render_report(directory):
+def probe_metadata(path):
+    records = [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+    environment = only(records, "environment")
+    return {name: environment.get(name) for name in ("utc", "tracked_changes")}
+
+
+def load_run(directory):
     counts = pytest_counts(directory / "correctness.xml")
     case_names = [case.name for case in REPEAT_CASES]
     identity, host = load_probe(directory / "unprofiled.jsonl", False, case_names)
-    device_rows = []
+    metadata = [probe_metadata(directory / "unprofiled.jsonl")]
+    device = {}
     for case in case_names:
         if case == "outer_control":
             continue
@@ -120,8 +127,26 @@ def render_report(directory):
             raise ValueError(f"CSV case does not match its probe: {case}")
         if any(summary["samples"] != capture_timings[case][name]["count"] for name, summary in measured[case].items()):
             raise ValueError(f"CSV sample count does not match its probe: {case}")
-        public = measured[case]["public_repeat"]["median_kernel_sum_us"]
-        candidate = measured[case]["direct_codegen"]["median_kernel_sum_us"]
+        device[case] = measured[case]
+        metadata.append(probe_metadata(directory / case / "probe.jsonl"))
+    return {
+        "directory": str(directory.resolve()),
+        "identity": identity,
+        "pytest": counts,
+        "host": host,
+        "device": device,
+        "probes": metadata,
+    }
+
+
+def render_report(directory):
+    run = load_run(directory)
+    counts, identity, host = run["pytest"], run["identity"], run["host"]
+    case_names = [case.name for case in REPEAT_CASES]
+    device_rows = []
+    for case, implementations in run["device"].items():
+        public = implementations["public_repeat"]["median_kernel_sum_us"]
+        candidate = implementations["direct_codegen"]["median_kernel_sum_us"]
         device_rows.append(f"| {case} | {public:.3f} | {candidate:.3f} | {public / candidate:.3f}x |")
     lines = [
         "# Repeat candidate hardware report",

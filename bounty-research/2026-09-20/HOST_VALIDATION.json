@@ -1,7 +1,7 @@
 {
-  "date": "2026-09-20",
+  "date": "2026-09-21",
   "base_commit": "9173350554b616022b3aa7c4fbad33f13cb36aee",
-  "status": "packed_row_local_validation_passed_new_hardware_run_pending",
+  "status": "packed_row_single_user_hardware_run_passed_repeatability_workflow_locally_validated",
   "submission_ready": false,
   "automatic_subtile_routing": "disabled; candidate requires the existing private forced-codegen entry",
   "host_environment": {
@@ -14,13 +14,13 @@
   },
   "unittest": {
     "command": "python3 -m unittest discover -s bounty-research/2026-09-20 -p 'test_*.py' -v",
-    "tests": 44,
+    "tests": 59,
     "failures": 0,
     "errors": 0,
     "skipped": 0,
-    "elapsed_seconds": 103.646,
+    "elapsed_seconds": 79.297,
     "log": "HOST_VALIDATION.txt",
-    "log_sha256": "cb23a85fc1f71f2bb028b77cc720e1083d54b487df07b335d6b0ba50cfb02222"
+    "log_sha256": "aaa3baac392c86746282a844d52171caedd79c46d7b5f8f35bd7cf4b96cd6c35"
   },
   "actual_reader_host_test": {
     "source": "ttnn/cpp/ttnn/operations/data_movement/repeat_interleave/codegen/kernels/reader_repeat_interleave_subtile.cpp",
@@ -69,7 +69,7 @@
   "format_and_syntax": {
     "black": {
       "version": "23.10.1",
-      "checked_files": 10,
+      "checked_files": 13,
       "result": "pass",
       "scope": "Candidate tools and device tests; unchanged earlier diagnostic helpers excluded",
       "full_sweep_existing_format_failures": [
@@ -85,19 +85,20 @@
     },
     "git_diff_check": "pass",
     "python_3_10_grammar": {
-      "checked_files": 12,
+      "checked_files": 15,
       "result": "pass"
     },
     "bash_syntax": {
-      "checked_scripts": 2,
+      "checked_scripts": 3,
       "scripts": [
         "setup_candidate_clone.sh",
-        "run_candidate_validation.sh"
+        "run_candidate_validation.sh",
+        "confirm_candidate_validation.sh"
       ],
       "result": "pass"
     },
     "non_linux_hardware_workflow_refusal": {
-      "checked_scripts": 2,
+      "checked_scripts": 3,
       "expected_exit_code": 2,
       "result": "pass"
     }
@@ -112,20 +113,20 @@
     "tests/ttnn/nightly/unit_tests/operations/data_movement/test_repeat_interleave_codegen_routing.py": "fbc9358564118ff12187d43a59f8c9bc242edc4c3dd2173e17bc04993131d103"
   },
   "not_validated": [
-    "Full Linux build and device JIT for the packed-row revision",
-    "Actual NoC/CB execution, physical allocation, and real cache rebinding for the packed-row revision",
-    "Expanded device correctness tests and new special-bit paths on hardware",
-    "Wormhole performance of the packed-row revision; first revision regressed device time in four cases",
+    "Independent local re-parsing of user hardware artifacts; only the supplied terminal summary is available locally",
+    "Three-run hardware confirmation with the new validation-only workflow",
+    "Performance across all supported shapes, repeat counts and dtypes beyond the five BF16 benchmark cases",
+    "Automatic public H/W routing and its end-to-end integration",
     "Blackhole correctness and performance",
     "Installed-wheel JIT kernel packaging",
     "End-to-end model performance",
-    "Project CI, license-header checks and maintainer approval"
+    "Project CI, license-header checks, maintainer acceptance and bounty eligibility"
   ],
   "revision": "repeat-direct-tile-candidate-v3-packed-rows",
   "device_tests": {
     "added_relative_to_base": 123,
     "added_since_first_hardware_run": 42,
-    "current_revision_hardware_run": false,
+    "current_revision_hardware_run": true,
     "previous_revision_user_run": {
       "commit": "8d601ab0ee2e7bd4383fd347b4ac6aecf820d912",
       "passed": 135,
@@ -134,6 +135,40 @@
       "errors": 0,
       "evidence": "DIRECT_TILE_V1_HARDWARE.md",
       "provenance": "User supplied completed terminal summary; raw hardware artifacts not available locally"
+    },
+    "current_reader_user_run": {
+      "commit": "0f7d9dfdacd347baf3f3cdd0fd7b75dc365c55a1",
+      "reader_sha256": "987446139978004bd4b9c148742382f8aefae8259fb27946baf8b280431676fc",
+      "passed": 177,
+      "skipped": 0,
+      "failures": 0,
+      "errors": 0,
+      "architecture": "Arch.WORMHOLE_B0",
+      "compute_grid": {
+        "x": 8,
+        "y": 9
+      },
+      "target_bf16_cases": 5,
+      "all_target_host_medians_improved": true,
+      "all_target_device_kernel_sum_medians_improved": true,
+      "evidence": "PACKED_ROW_HARDWARE.md",
+      "artifact_directory_on_hardware_host": "/tmp/tt-repeat-direct.5cmJXI",
+      "provenance": "User supplied completed terminal summary; raw hardware artifacts not available locally"
     }
+  },
+  "repeatability_workflow": {
+    "local_tests": 15,
+    "hardware_execution": "pending",
+    "reader_and_device_tests_changed_since_user_run": false,
+    "scope": "Three separate complete runs; compare every target case and run without pooling samples, selecting the best run or enabling routing",
+    "mocks_are_hardware_evidence": false
+  },
+  "validation_tools_sha256": {
+    "bounty-research/2026-09-20/confirm_candidate_runs.py": "a091674cced7f6993167a70927e08e9ae5a4f29f12d814d494a6d5bd4a5eaedc",
+    "bounty-research/2026-09-20/confirm_candidate_validation.sh": "dbebd45120668836d447ae19bddb90372a2f7d6df4bac327b85ef49a48910bd3",
+    "bounty-research/2026-09-20/report_candidate_run.py": "4b302864a5ca07ed32a53fdbe13ccc1621a467ca534ffb66d552f21c41692de0",
+    "bounty-research/2026-09-20/test_confirm_candidate_runs.py": "662362d10f8eebc8c16bf8f37dd895ae731917cfd203f1bc2df10f27cc7f90ba",
+    "bounty-research/2026-09-20/test_confirmation_workflow.py": "b0ea1a3e20786fbc2292e89154585f8f314d0052699390452fd992e25a36501d",
+    "bounty-research/2026-09-20/test_summarize_repeat_capture.py": "eca9330003cf15a478a3a80925f756e937aa417311c16f6195d56423a0f36fcd"
   }
 }

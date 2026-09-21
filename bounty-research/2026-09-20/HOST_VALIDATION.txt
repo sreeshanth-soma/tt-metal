@@ -3,6 +3,21 @@ test_correctness_failure_stops_before_benchmark (test_candidate_workflow.Candida
 test_rejects_missing_candidate_environment (test_candidate_workflow.CandidateWorkflowTests.test_rejects_missing_candidate_environment) ... ok
 test_rejects_non_linux_before_opening_runtime (test_candidate_workflow.CandidateWorkflowTests.test_rejects_non_linux_before_opening_runtime) ... ok
 test_selects_candidate_environment_not_inherited_checkout (test_candidate_workflow.CandidateWorkflowTests.test_selects_candidate_environment_not_inherited_checkout) ... ok
+test_cli_returns_failure_and_preserves_existing_json (test_confirm_candidate_runs.ConfirmationTests.test_cli_returns_failure_and_preserves_existing_json) ... ok
+test_complete_runs_keep_separate_ratios_and_outliers (test_confirm_candidate_runs.ConfirmationTests.test_complete_runs_keep_separate_ratios_and_outliers) ... ok
+test_device_regression_is_not_hidden_by_host_improvement (test_confirm_candidate_runs.ConfirmationTests.test_device_regression_is_not_hidden_by_host_improvement) ... ok
+test_host_regression_is_not_hidden_by_other_runs (test_confirm_candidate_runs.ConfirmationTests.test_host_regression_is_not_hidden_by_other_runs) ... ok
+test_outer_control_is_not_credited_to_new_reader (test_confirm_candidate_runs.ConfirmationTests.test_outer_control_is_not_credited_to_new_reader) ... ok
+test_rejects_copied_run_artifacts (test_confirm_candidate_runs.ConfirmationTests.test_rejects_copied_run_artifacts) ... ok
+test_rejects_different_commits_across_complete_runs (test_confirm_candidate_runs.ConfirmationTests.test_rejects_different_commits_across_complete_runs) ... ok
+test_rejects_dirty_or_undated_probes (test_confirm_candidate_runs.ConfirmationTests.test_rejects_dirty_or_undated_probes) ... ok
+test_rejects_short_samples_or_skipped_tests (test_confirm_candidate_runs.ConfirmationTests.test_rejects_short_samples_or_skipped_tests) ... ok
+test_requires_three_distinct_directories (test_confirm_candidate_runs.ConfirmationTests.test_requires_three_distinct_directories) ... ok
+test_propagates_regression_exit_code_and_keeps_report (test_confirmation_workflow.ConfirmationWorkflowTests.test_propagates_regression_exit_code_and_keeps_report) ... ok
+test_refuses_non_linux (test_confirmation_workflow.ConfirmationWorkflowTests.test_refuses_non_linux) ... ok
+test_rejects_missing_artifacts (test_confirmation_workflow.ConfirmationWorkflowTests.test_rejects_missing_artifacts) ... ok
+test_runs_three_processes_and_builds_only_once (test_confirmation_workflow.ConfirmationWorkflowTests.test_runs_three_processes_and_builds_only_once) ... ok
+test_stops_on_failed_run_without_claiming_confirmation (test_confirmation_workflow.ConfirmationWorkflowTests.test_stops_on_failed_run_without_claiming_confirmation) ... ok
 test_benchmark_labels_samples_and_keeps_alternating_order (test_hardware_probe.ProbeHostTests.test_benchmark_labels_samples_and_keeps_alternating_order) ... ok
 test_case_matrix_is_bounded (test_hardware_probe.ProbeHostTests.test_case_matrix_is_bounded) ... ok
 test_conv_dimensions (test_hardware_probe.ProbeHostTests.test_conv_dimensions) ... ok
@@ -77,6 +92,6 @@ test_requires_the_actual_new_kernel (test_summarize_repeat_capture.CaptureSummar
 test_sums_each_measured_call_before_taking_median (test_summarize_repeat_capture.CaptureSummaryTests.test_sums_each_measured_call_before_taking_median) ... ok
 
 ----------------------------------------------------------------------
-Ran 44 tests in 103.646s
+Ran 59 tests in 79.297s
 
 OK

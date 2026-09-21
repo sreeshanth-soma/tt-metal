@@ -18,12 +18,12 @@ def operation(duration, code="RepeatInterleaveCodegenDeviceOperation", device="0
     }
 
 
-def capture():
+def capture(sample_count=3):
     rows = [operation(999999)]
     rows.extend(
         [marker("public_repeat", "warmup", 0, "begin"), operation(999999), marker("public_repeat", "warmup", 0, "end")]
     )
-    for index in range(3):
+    for index in range(sample_count):
         rows.extend(
             [
                 marker("public_repeat", "sample", index, "begin"),

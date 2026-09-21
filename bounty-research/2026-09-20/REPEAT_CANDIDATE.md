@@ -1,12 +1,14 @@
 # Repeat-interleave: implementation and acceptance package
 
-Date: **September 20, 2026**. Base: `9173350554b616022b3aa7c4fbad33f13cb36aee`.
+Updated: **September 21, 2026**. Base: `9173350554b616022b3aa7c4fbad33f13cb36aee`.
 
 ## Bottom line
 
 The submission worth pursuing is a **measured, narrowly routed, tile-preserving copy implementation of H/W repeat-interleave**. It is not a universal dense-matmul replacement and not a redo of the already-merged repeat codegen port.
 
-The first candidate completed the user's Wormhole build and validation: **135 device tests passed**, and the five H/W cases had lower unprofiled host latency. However, **four of five cases regressed in profiled device kernel time**. See `DIRECT_TILE_V1_HARDWARE.md` for the exact commit, source hash, reported measurements and provenance limits. The packed-row revision addresses scalar copy work but needs a new hardware run. **It is not yet ready to claim a production speedup or submit as a completed performance fix.** The H/W path remains accessible through the existing private forced-codegen entry only; public routing stays native.
+The packed-row candidate completed the user's Wormhole build and validation at commit `0f7d9dfdacd347baf3f3cdd0fd7b75dc365c55a1`: **177 device tests passed**, and **all five H/W cases improved both unprofiled host latency and profiled device-kernel sums**. The reported ratios are 3.023x–4.048x for host latency and 1.821x–2.236x for device-kernel sums. See `PACKED_ROW_HARDWARE.md` for the measurements, source hash and provenance limits. This is one successful run, not a universal or production-routing claim. The validation-only follow-up keeps the measured kernel unchanged and checks three complete runs before any routing decision. The H/W path remains accessible through the existing private forced-codegen entry only; public routing stays native.
+
+The earlier scalar reader passed 135 tests but regressed device time in four of five cases. Its separate evidence remains in `DIRECT_TILE_V1_HARDWARE.md`; do not combine those measurements with the packed-row result.
 
 The candidate is on the development branch `perf/repeat-interleave-tile-copy` for hardware validation. No issue, assignment request, bounty claim or PR has been submitted. No changes were made to the earlier hardware installation.
 
@@ -23,12 +25,14 @@ These are acceptance prerequisites and relevant review precedents, not a promise
 | Rebound input/output buffers on cache hits | Same review required a second dispatch with fresh allocations | Tests retain both inputs and outputs and check cache count |
 | Installed JIT source availability | PR #50700 review discussion `3702406187` / `3703439258` found a packaging omission | New reader matches existing CMake `*.cpp` kernel glob; a fresh configure is required |
 | No dead or redundant kernel code | PR #50700 review discussion `3751739682` / `3756762075` | One reader, no new public API; unnecessary second scratch page removed |
-| Actual performance evidence without regressions | Performance category in `CONTRIBUTING.md:160` | First Wormhole run has four device-time regressions; packed-row revision requires remeasurement |
+| Actual performance evidence without regressions | Performance category in `CONTRIBUTING.md:160` | Packed-row run improves both medians in five BF16 cases; repeated runs and broader coverage remain pending |
 | Required CI, beyond initial PR checks | `CONTRIBUTING.md:134` | Not run; maintainer-triggered coverage may be needed |
 
 The title/description searches found no open PR explicitly implementing this generic tiled H/W path at the audit time. That is **not proof of exclusivity** or permission to claim someone else's issue. Model-specific repeat elimination, concat ports, and matmul tuning are separate overlapping areas to avoid packaging into this change.
 
 Bounty eligibility is separate from technical acceptance. The published terms inspected on September 20 require a merged contribution addressing an appropriately tagged open bounty issue, assignment at PR submission, and the remaining program conditions. This candidate has no confirmed bounty or assignment. The repository's AI restrictions (`CONTRIBUTING.md:584`) prohibit automated/AI-generated assignment claims; any submission requires human review and responsibility. This document is an internal implementation checklist, not an assignment-request template.
+
+The official terms were rechecked on September 21. Exhibit A lists $501–$1,999 for medium and $2,000–$3,000 for hard tasks, with performance work among the examples. Those are program categories, **not a reward assigned to this candidate**. No payment is promised, and this work could remain an unpaid contribution. Before treating more hardware or integration effort as paid work, the human contributor should establish maintainer interest, approved issue scope and actual bounty eligibility; more benchmark runs cannot establish any of those.
 
 ## Why the matmul experiment is not the solution
 
@@ -91,17 +95,31 @@ On the observed 8×9 grid, output-page splitting assigns the width case's 64 til
 - AddressSanitizer and UndefinedBehaviorSanitizer, `-Wall -Wextra -Werror`.
 - Guarded scratch/output allocations, current-reservation checks on every write, delayed mock NoC reads until the barrier, batched writer backpressure/ring-wrap checks, raw special-value bit patterns, and exact padded-output comparison.
 - Mock access counters require exactly one store per output word, packed source loads for H and aligned W, and source-word reuse for aligned W. They are structural checks, **not device timing estimates**.
-- The host suite also covers profiler signposts, alternated benchmark order, CLI preflight, old-checkout rejection, committed-descendant acceptance, simulation/debug-mode rejection, CSV aggregation, report identity checks, environment isolation, and failure-stop behavior. `HOST_VALIDATION.json` and `HOST_VALIDATION.txt` record the current run's counts, hashes and formatting/syntax checks.
+- The host suite also covers profiler signposts, alternated benchmark order, CLI preflight, old-checkout rejection, committed-descendant acceptance, simulation/debug-mode rejection, CSV aggregation, report identity checks, environment isolation, failure-stop behavior, and three-run confirmation. Confirmation fixtures reject copied or mismatched runs, insufficient samples, skips, dirty tracked sources, and any target-case median regression. These fixtures are not hardware measurements. `HOST_VALIDATION.json` and `HOST_VALIDATION.txt` record the current run's counts, hashes and formatting/syntax checks.
 
 These are **host mocks**, not official tt-emule or Tenstorrent hardware. They do not validate actual NoC transactions, the complete TTNN C++ build, physical allocator behavior, real cache rebinding, device compiler ABI, or speed. `HOST_VALIDATION.json` records the final source hash and results.
 
-### Device evidence and pending rerun
+### Device evidence and repeatability
 
-The first 81 added device-test instances were included in the user's passing 135-test run at commit `8d601ab0ee2e7bd4383fd347b4ac6aecf820d912`. The packed-row revision adds 42 more instances: ragged/single-element W repeats, an R=16 general-path case, and special-value bit patterns for R=2/4/8. There are now 123 added instances relative to the pinned base; existing routing tests continue to check native fallback. **The revised reader and expanded device tests have not yet run on hardware.**
+The first 81 added device-test instances were included in the user's passing 135-test run at commit `8d601ab0ee2e7bd4383fd347b4ac6aecf820d912`. The packed-row revision adds 42 more instances: ragged/single-element W repeats, an R=16 general-path case, and special-value bit patterns for R=2/4/8. There are now 123 added instances relative to the pinned base; existing routing tests continue to check native fallback. **The user's second run passed all 177 focused tests at commit `0f7d9dfdacd347baf3f3cdd0fd7b75dc365c55a1`, with no skips/failures/errors.**
 
-The local environment is macOS without a TT device or Torch/TTNN runtime. The user's first-run summary verifies that the original revision completed the Linux setup/build/JIT workflow on Wormhole, but does not validate the revised reader. Blackhole, installed-wheel packaging, project CI and model-level performance remain unverified.
+The local environment is macOS without a TT device or Torch/TTNN runtime. The second supplied summary reports the packed-row Linux build, hardware correctness and five-case performance result; its raw artifacts remain on the user's hardware host and have not been independently re-parsed locally. The three-run workflow has not yet been executed on that hardware. Broader shape/dtype performance, Blackhole, installed-wheel packaging, project CI and model-level performance remain unverified.
 
-## Hardware handoff: one bounded workflow
+## Hardware handoff: repeated confirmation
+
+For the already prepared candidate checkout, **do not clone again or rerun setup**:
+
+```bash
+cd "$HOME/tt-metal-repeat-direct" &&
+git pull --ff-only &&
+bash bounty-research/2026-09-20/confirm_candidate_validation.sh --build
+```
+
+The confirmation wrapper builds once, then runs three complete validations in separate child processes. It activates the prepared candidate environment through the existing runner and saves all three runs under a new `/tmp/tt-repeat-confirm.*` directory. Keep the previous `/tmp/tt-repeat-direct.5cmJXI` and `/tmp/tt-repeat-direct.xLpGzF` directories unchanged. Only the final `CONFIRMATION.md` needs to be shared; keep `CONFIRMATION.json` and all raw artifacts alongside it.
+
+The report requires matching commit/source/runtime/device identity, a clean tracked checkout, distinct timezone-aware probe start times, the same executed test counts with zero skips, at least 51 host samples and five device samples per leg, and equal sample counts across runs. It re-parses the raw probes/CSVs and requires an improvement in both median metrics in **every run** for every target H/W case. Samples are not pooled, outliers are not discarded, and the outer control is excluded from the pass decision. A regression returns a nonzero status but preserves the report; a failed child run stops further execution and preserves its logs. Passing this gate does not enable routing or prove statistical significance or performance outside these cases.
+
+### Initial setup for a different machine
 
 Clone the development branch into a **new directory** on the Linux hardware machine. The branch includes the implementation and tools; no archive transfer or manual patch application is needed:
 
@@ -119,7 +137,7 @@ The script verifies that the candidate descends from the pinned base, checks its
 
 Probe records contain both the pinned base and the actual candidate commit, plus source hashes. Summaries reject measurements from different commits, sources, runtimes or devices. Do not use a shallow clone that omits the pinned base's history.
 
-For the already prepared candidate checkout, **do not clone again or rerun setup**:
+For a single diagnostic rerun in an already prepared checkout:
 
 ```bash
 cd "$HOME/tt-metal-repeat-direct" &&
@@ -127,7 +145,7 @@ git pull --ff-only &&
 bash bounty-research/2026-09-20/run_candidate_validation.sh --build
 ```
 
-The runner activates that checkout's own `python_env`, uses its absolute Python executable and build libraries, and replaces inherited source paths. It is safe to launch from a shell still displaying the original checkout's `(python_env)` prompt. Activation stays inside the child script and does not change the parent shell. `git pull --ff-only` does not discard local edits or rewrite history. Keep `/tmp/tt-repeat-direct.xLpGzF` as the original run; the runner creates a different results directory for every rerun.
+The runner activates that checkout's own `python_env`, uses its absolute Python executable and build libraries, and replaces inherited source paths. It is safe to launch from a shell still displaying the original checkout's `(python_env)` prompt. Activation stays inside the child script and does not change the parent shell. `git pull --ff-only` does not discard local edits or rewrite history. The runner creates a different results directory for every run.
 
 The runner stops on failure, preserves logs, and performs:
 
@@ -146,7 +164,7 @@ python bounty-research/2026-09-20/summarize_repeat_capture.py /path/to/ops_perf_
 
 ## Gates before submission
 
-- Build and run the new tests on real Wormhole, then Blackhole for any claimed cross-architecture routing.
+- Confirm the passing Wormhole result across independent runs and broader inputs, then test Blackhole before any claimed cross-architecture routing.
 - Verify installed JIT sources, runtime source root, and that both measurements use the same source revision and execution settings.
 - Review every case's distribution, not just the best ratio. Keep outliers and profiling overhead separate from device-kernel time.
 - Promote **only measured-winning, correctness-validated configurations** in `is_demoted`; keep losing/unsupported configurations native. Do not turn this forced-only patch into a claimed production improvement without that step.
@@ -154,4 +172,4 @@ python bounty-research/2026-09-20/summarize_repeat_capture.py /path/to/ops_perf_
 - Complete project CI/package/license-header checks and human code review; the host harness does not replace them.
 - Obtain issue/scope approval and, if seeking payment, the separate required bounty assignment/eligibility. Neither has been established by these results.
 
-The defensible outcome now is **one correctness-validated Wormhole candidate with mixed performance, plus a locally checked packed-row revision ready for another hardware run**, not an acceptance or payment guarantee.
+The defensible outcome now is **a packed-row candidate with 177 reported passing Wormhole tests and one run of five H/W cases winning both timing metrics, plus a locally tested repeatability workflow**, not a production-routing, acceptance or payment guarantee.
