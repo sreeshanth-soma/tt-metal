@@ -1,0 +1,123 @@
+test_build_failure_preserves_log_and_stops_before_hardware (test_candidate_workflow.CandidateWorkflowTests.test_build_failure_preserves_log_and_stops_before_hardware) ... ok
+test_correctness_failure_stops_before_benchmark (test_candidate_workflow.CandidateWorkflowTests.test_correctness_failure_stops_before_benchmark) ... ok
+test_rejects_missing_candidate_environment (test_candidate_workflow.CandidateWorkflowTests.test_rejects_missing_candidate_environment) ... ok
+test_rejects_non_linux_before_opening_runtime (test_candidate_workflow.CandidateWorkflowTests.test_rejects_non_linux_before_opening_runtime) ... ok
+test_selects_candidate_environment_not_inherited_checkout (test_candidate_workflow.CandidateWorkflowTests.test_selects_candidate_environment_not_inherited_checkout) ... ok
+test_cli_returns_failure_and_preserves_existing_json (test_confirm_candidate_runs.ConfirmationTests.test_cli_returns_failure_and_preserves_existing_json) ... ok
+test_complete_runs_keep_separate_ratios_and_outliers (test_confirm_candidate_runs.ConfirmationTests.test_complete_runs_keep_separate_ratios_and_outliers) ... ok
+test_device_regression_is_not_hidden_by_host_improvement (test_confirm_candidate_runs.ConfirmationTests.test_device_regression_is_not_hidden_by_host_improvement) ... ok
+test_host_regression_is_not_hidden_by_other_runs (test_confirm_candidate_runs.ConfirmationTests.test_host_regression_is_not_hidden_by_other_runs) ... ok
+test_outer_control_is_not_credited_to_new_reader (test_confirm_candidate_runs.ConfirmationTests.test_outer_control_is_not_credited_to_new_reader) ... ok
+test_rejects_copied_run_artifacts (test_confirm_candidate_runs.ConfirmationTests.test_rejects_copied_run_artifacts) ... ok
+test_rejects_different_commits_across_complete_runs (test_confirm_candidate_runs.ConfirmationTests.test_rejects_different_commits_across_complete_runs) ... ok
+test_rejects_dirty_or_undated_probes (test_confirm_candidate_runs.ConfirmationTests.test_rejects_dirty_or_undated_probes) ... ok
+test_rejects_short_samples_or_skipped_tests (test_confirm_candidate_runs.ConfirmationTests.test_rejects_short_samples_or_skipped_tests) ... ok
+test_requires_three_distinct_directories (test_confirm_candidate_runs.ConfirmationTests.test_requires_three_distinct_directories) ... ok
+test_propagates_regression_exit_code_and_keeps_report (test_confirmation_workflow.ConfirmationWorkflowTests.test_propagates_regression_exit_code_and_keeps_report) ... ok
+test_refuses_non_linux (test_confirmation_workflow.ConfirmationWorkflowTests.test_refuses_non_linux) ... ok
+test_rejects_missing_artifacts (test_confirmation_workflow.ConfirmationWorkflowTests.test_rejects_missing_artifacts) ... ok
+test_runs_three_processes_and_builds_only_once (test_confirmation_workflow.ConfirmationWorkflowTests.test_runs_three_processes_and_builds_only_once) ... ok
+test_stops_on_failed_run_without_claiming_confirmation (test_confirmation_workflow.ConfirmationWorkflowTests.test_stops_on_failed_run_without_claiming_confirmation) ... ok
+test_benchmark_labels_samples_and_keeps_alternating_order (test_hardware_probe.ProbeHostTests.test_benchmark_labels_samples_and_keeps_alternating_order) ... ok
+test_case_matrix_is_bounded (test_hardware_probe.ProbeHostTests.test_case_matrix_is_bounded) ... ok
+test_conv_dimensions (test_hardware_probe.ProbeHostTests.test_conv_dimensions) ... ok
+test_disabled_profile_regions_emit_no_markers (test_hardware_probe.ProbeHostTests.test_disabled_profile_regions_emit_no_markers) ... ok
+test_invalid_suite_options_are_rejected (test_hardware_probe.ProbeHostTests.test_invalid_suite_options_are_rejected) ... ok
+test_left_selector_repeats_rows (test_hardware_probe.ProbeHostTests.test_left_selector_repeats_rows) ... ok
+test_list_needs_no_torch_or_device (test_hardware_probe.ProbeHostTests.test_list_needs_no_torch_or_device) ... ok
+test_profile_checks_run_before_imports_or_device_open (test_hardware_probe.ProbeHostTests.test_profile_checks_run_before_imports_or_device_open) ... ok
+test_profile_options_require_a_bounded_single_case (test_hardware_probe.ProbeHostTests.test_profile_options_require_a_bounded_single_case) ... ok
+test_profile_regions_mark_failures_without_success_end (test_hardware_probe.ProbeHostTests.test_profile_regions_mark_failures_without_success_end) ... ok
+test_reporter_flushes_and_preserves_existing_file (test_hardware_probe.ProbeHostTests.test_reporter_flushes_and_preserves_existing_file) ... ok
+test_right_selector_repeats_columns (test_hardware_probe.ProbeHostTests.test_right_selector_repeats_columns) ... ok
+test_selector_materializes_every_case_batch (test_hardware_probe.ProbeHostTests.test_selector_materializes_every_case_batch) ... ok
+test_selector_preserves_multiple_nonunit_batch_dimensions (test_hardware_probe.ProbeHostTests.test_selector_preserves_multiple_nonunit_batch_dimensions) ... ok
+test_selector_rejects_empty_inputs (test_hardware_probe.ProbeHostTests.test_selector_rejects_empty_inputs) ... ok
+test_selector_rejects_outer_axis (test_hardware_probe.ProbeHostTests.test_selector_rejects_outer_axis) ... ok
+test_timing_summary (test_hardware_probe.ProbeHostTests.test_timing_summary) ... ok
+test_timing_summary_rejects_invalid_samples (test_hardware_probe.ProbeHostTests.test_timing_summary_rejects_invalid_samples) ... ok
+test_accepts_committed_candidate_descendant (test_repeat_candidate_probe.CandidateProbeTests.test_accepts_committed_candidate_descendant) ... ok
+test_list_does_not_open_a_device (test_repeat_candidate_probe.CandidateProbeTests.test_list_does_not_open_a_device) ... ok
+test_profile_accepts_explicit_small_capture (test_repeat_candidate_probe.CandidateProbeTests.test_profile_accepts_explicit_small_capture) ... ok
+test_profile_requires_bounded_labelled_single_case (test_repeat_candidate_probe.CandidateProbeTests.test_profile_requires_bounded_labelled_single_case) ... ok
+test_rejects_emulation_and_debug_timings (test_repeat_candidate_probe.CandidateProbeTests.test_rejects_emulation_and_debug_timings) ... ok
+test_rejects_missing_candidate_sources_on_descendant (test_repeat_candidate_probe.CandidateProbeTests.test_rejects_missing_candidate_sources_on_descendant) ... ok
+test_rejects_old_hardware_checkout_before_runtime (test_repeat_candidate_probe.CandidateProbeTests.test_rejects_old_hardware_checkout_before_runtime) ... ok
+test_actual_reader_with_guarded_host_mocks (test_repeat_subtile_host.RepeatSubtileHostTest.test_actual_reader_with_guarded_host_mocks) ... {"element_bytes": 2, "repeat_height": 0, "repeats": 2, "cases": 251, "core_invocations": 1442, "checked_padded_elements": 3198976, "source_page_reads": 2275, "source_l1_halfword_reads": 0, "source_l1_word_reads": 453648, "output_l1_word_writes": 1599488, "second_slot_reads": 0}
+{"element_bytes": 2, "repeat_height": 0, "repeats": 3, "cases": 251, "core_invocations": 1786, "checked_padded_elements": 4590592, "source_page_reads": 2698, "source_l1_halfword_reads": 2632736, "source_l1_word_reads": 0, "output_l1_word_writes": 2295296, "second_slot_reads": 0}
+{"element_bytes": 2, "repeat_height": 0, "repeats": 4, "cases": 251, "core_invocations": 2139, "checked_padded_elements": 5992448, "source_page_reads": 3055, "source_l1_halfword_reads": 0, "source_l1_word_reads": 434380, "output_l1_word_writes": 2996224, "second_slot_reads": 0}
+{"element_bytes": 2, "repeat_height": 0, "repeats": 7, "cases": 251, "core_invocations": 2954, "checked_padded_elements": 10202112, "source_page_reads": 4026, "source_l1_halfword_reads": 5988128, "source_l1_word_reads": 0, "output_l1_word_writes": 5101056, "second_slot_reads": 0}
+{"element_bytes": 2, "repeat_height": 0, "repeats": 8, "cases": 251, "core_invocations": 3135, "checked_padded_elements": 11520000, "source_page_reads": 4173, "source_l1_halfword_reads": 0, "source_l1_word_reads": 424686, "output_l1_word_writes": 5760000, "second_slot_reads": 0}
+{"element_bytes": 2, "repeat_height": 0, "repeats": 16, "cases": 251, "core_invocations": 4389, "checked_padded_elements": 22590464, "source_page_reads": 5544, "source_l1_halfword_reads": 13386240, "source_l1_word_reads": 0, "output_l1_word_writes": 11295232, "second_slot_reads": 0}
+{"element_bytes": 2, "repeat_height": 0, "repeats": 33, "cases": 251, "core_invocations": 5711, "checked_padded_elements": 46388224, "source_page_reads": 6983, "source_l1_halfword_reads": 27747136, "source_l1_word_reads": 0, "output_l1_word_writes": 23194112, "second_slot_reads": 0}
+{"element_bytes": 2, "repeat_height": 0, "repeats": 127, "cases": 251, "core_invocations": 7058, "checked_padded_elements": 177236992, "source_page_reads": 8478, "source_l1_halfword_reads": 106372800, "source_l1_word_reads": 0, "output_l1_word_writes": 88618496, "second_slot_reads": 0}
+{"element_bytes": 2, "repeat_height": 1, "repeats": 2, "cases": 251, "core_invocations": 1401, "checked_padded_elements": 2824192, "source_page_reads": 2634, "source_l1_halfword_reads": 0, "source_l1_word_reads": 487328, "output_l1_word_writes": 1412096, "second_slot_reads": 0}
+{"element_bytes": 2, "repeat_height": 1, "repeats": 3, "cases": 251, "core_invocations": 1774, "checked_padded_elements": 3881984, "source_page_reads": 3519, "source_l1_halfword_reads": 0, "source_l1_word_reads": 547408, "output_l1_word_writes": 1940992, "second_slot_reads": 0}
+{"element_bytes": 2, "repeat_height": 1, "repeats": 4, "cases": 251, "core_invocations": 2078, "checked_padded_elements": 4892672, "source_page_reads": 4355, "source_l1_halfword_reads": 0, "source_l1_word_reads": 487328, "output_l1_word_writes": 2446336, "second_slot_reads": 0}
+{"element_bytes": 2, "repeat_height": 1, "repeats": 7, "cases": 251, "core_invocations": 2894, "checked_padded_elements": 8395776, "source_page_reads": 7278, "source_l1_halfword_reads": 0, "source_l1_word_reads": 669616, "output_l1_word_writes": 4197888, "second_slot_reads": 0}
+{"element_bytes": 2, "repeat_height": 1, "repeats": 8, "cases": 251, "core_invocations": 3095, "checked_padded_elements": 9375744, "source_page_reads": 8072, "source_l1_halfword_reads": 0, "source_l1_word_reads": 487328, "output_l1_word_writes": 4687872, "second_slot_reads": 0}
+{"element_bytes": 2, "repeat_height": 1, "repeats": 16, "cases": 251, "core_invocations": 4362, "checked_padded_elements": 18258944, "source_page_reads": 15240, "source_l1_halfword_reads": 0, "source_l1_word_reads": 487328, "output_l1_word_writes": 9129472, "second_slot_reads": 0}
+{"element_bytes": 2, "repeat_height": 1, "repeats": 33, "cases": 251, "core_invocations": 5658, "checked_padded_elements": 37782528, "source_page_reads": 30413, "source_l1_halfword_reads": 0, "source_l1_word_reads": 1461984, "output_l1_word_writes": 18891264, "second_slot_reads": 0}
+{"element_bytes": 2, "repeat_height": 1, "repeats": 127, "cases": 251, "core_invocations": 6982, "checked_padded_elements": 143082496, "source_page_reads": 108591, "source_l1_halfword_reads": 0, "source_l1_word_reads": 4323072, "output_l1_word_writes": 71541248, "second_slot_reads": 0}
+{"element_bytes": 4, "repeat_height": 0, "repeats": 2, "cases": 251, "core_invocations": 1442, "checked_padded_elements": 3198976, "source_page_reads": 2275, "source_l1_halfword_reads": 0, "source_l1_word_reads": 907296, "output_l1_word_writes": 3198976, "second_slot_reads": 0}
+{"element_bytes": 4, "repeat_height": 0, "repeats": 3, "cases": 251, "core_invocations": 1786, "checked_padded_elements": 4590592, "source_page_reads": 2698, "source_l1_halfword_reads": 0, "source_l1_word_reads": 2632736, "output_l1_word_writes": 4590592, "second_slot_reads": 0}
+{"element_bytes": 4, "repeat_height": 0, "repeats": 4, "cases": 251, "core_invocations": 2139, "checked_padded_elements": 5992448, "source_page_reads": 3055, "source_l1_halfword_reads": 0, "source_l1_word_reads": 868760, "output_l1_word_writes": 5992448, "second_slot_reads": 0}
+{"element_bytes": 4, "repeat_height": 0, "repeats": 7, "cases": 251, "core_invocations": 2954, "checked_padded_elements": 10202112, "source_page_reads": 4026, "source_l1_halfword_reads": 0, "source_l1_word_reads": 5988128, "output_l1_word_writes": 10202112, "second_slot_reads": 0}
+{"element_bytes": 4, "repeat_height": 0, "repeats": 8, "cases": 251, "core_invocations": 3135, "checked_padded_elements": 11520000, "source_page_reads": 4173, "source_l1_halfword_reads": 0, "source_l1_word_reads": 849372, "output_l1_word_writes": 11520000, "second_slot_reads": 0}
+{"element_bytes": 4, "repeat_height": 0, "repeats": 16, "cases": 251, "core_invocations": 4389, "checked_padded_elements": 22590464, "source_page_reads": 5544, "source_l1_halfword_reads": 0, "source_l1_word_reads": 13386240, "output_l1_word_writes": 22590464, "second_slot_reads": 0}
+{"element_bytes": 4, "repeat_height": 0, "repeats": 33, "cases": 251, "core_invocations": 5711, "checked_padded_elements": 46388224, "source_page_reads": 6983, "source_l1_halfword_reads": 0, "source_l1_word_reads": 27747136, "output_l1_word_writes": 46388224, "second_slot_reads": 0}
+{"element_bytes": 4, "repeat_height": 0, "repeats": 127, "cases": 251, "core_invocations": 7058, "checked_padded_elements": 177236992, "source_page_reads": 8478, "source_l1_halfword_reads": 0, "source_l1_word_reads": 106372800, "output_l1_word_writes": 177236992, "second_slot_reads": 0}
+{"element_bytes": 4, "repeat_height": 1, "repeats": 2, "cases": 251, "core_invocations": 1401, "checked_padded_elements": 2824192, "source_page_reads": 2634, "source_l1_halfword_reads": 0, "source_l1_word_reads": 974656, "output_l1_word_writes": 2824192, "second_slot_reads": 0}
+{"element_bytes": 4, "repeat_height": 1, "repeats": 3, "cases": 251, "core_invocations": 1774, "checked_padded_elements": 3881984, "source_page_reads": 3519, "source_l1_halfword_reads": 0, "source_l1_word_reads": 1094816, "output_l1_word_writes": 3881984, "second_slot_reads": 0}
+{"element_bytes": 4, "repeat_height": 1, "repeats": 4, "cases": 251, "core_invocations": 2078, "checked_padded_elements": 4892672, "source_page_reads": 4355, "source_l1_halfword_reads": 0, "source_l1_word_reads": 974656, "output_l1_word_writes": 4892672, "second_slot_reads": 0}
+{"element_bytes": 4, "repeat_height": 1, "repeats": 7, "cases": 251, "core_invocations": 2894, "checked_padded_elements": 8395776, "source_page_reads": 7278, "source_l1_halfword_reads": 0, "source_l1_word_reads": 1339232, "output_l1_word_writes": 8395776, "second_slot_reads": 0}
+{"element_bytes": 4, "repeat_height": 1, "repeats": 8, "cases": 251, "core_invocations": 3095, "checked_padded_elements": 9375744, "source_page_reads": 8072, "source_l1_halfword_reads": 0, "source_l1_word_reads": 974656, "output_l1_word_writes": 9375744, "second_slot_reads": 0}
+{"element_bytes": 4, "repeat_height": 1, "repeats": 16, "cases": 251, "core_invocations": 4362, "checked_padded_elements": 18258944, "source_page_reads": 15240, "source_l1_halfword_reads": 0, "source_l1_word_reads": 974656, "output_l1_word_writes": 18258944, "second_slot_reads": 0}
+{"element_bytes": 4, "repeat_height": 1, "repeats": 33, "cases": 251, "core_invocations": 5658, "checked_padded_elements": 37782528, "source_page_reads": 30413, "source_l1_halfword_reads": 0, "source_l1_word_reads": 2923968, "output_l1_word_writes": 37782528, "second_slot_reads": 0}
+{"element_bytes": 4, "repeat_height": 1, "repeats": 127, "cases": 251, "core_invocations": 6982, "checked_padded_elements": 143082496, "source_page_reads": 108591, "source_l1_halfword_reads": 0, "source_l1_word_reads": 8646144, "output_l1_word_writes": 143082496, "second_slot_reads": 0}
+{"event": "host_validation_summary", "kernel_sha256": "987446139978004bd4b9c148742382f8aefae8259fb27946baf8b280431676fc", "variants": 32, "cases": 8032, "core_invocations": 113716, "checked_padded_elements": 1020428288, "source_l1_halfword_reads": 156127040, "source_l1_word_reads": 186919358, "output_l1_word_writes": 765321216, "validation": "actual reader with guarded host mocks, ASan and UBSan; not device execution"}
+ok
+test_bit_metrics_use_one_integer_word_per_element (test_repeat_sweep_cases.SweepCaseTests.test_bit_metrics_use_one_integer_word_per_element) ... ok
+test_case_selection_and_minimum_samples_are_enforced (test_repeat_sweep_cases.SweepCaseTests.test_case_selection_and_minimum_samples_are_enforced) ... ok
+test_dirty_checkout_is_rejected_before_importing_runtime (test_repeat_sweep_cases.SweepCaseTests.test_dirty_checkout_is_rejected_before_importing_runtime) ... ok
+test_dtype_specific_inputs_do_not_convert_integer_values_to_float (test_repeat_sweep_cases.SweepCaseTests.test_dtype_specific_inputs_do_not_convert_integer_values_to_float) ... ok
+test_fixed_matrix_covers_axes_ranks_repeats_and_dtypes (test_repeat_sweep_cases.SweepCaseTests.test_fixed_matrix_covers_axes_ranks_repeats_and_dtypes) ... ok
+test_instrumented_runtime_is_rejected_before_benchmarking (test_repeat_sweep_cases.SweepCaseTests.test_instrumented_runtime_is_rejected_before_benchmarking) ... ok
+test_manifest_is_deterministic_and_list_needs_no_runtime (test_repeat_sweep_cases.SweepCaseTests.test_manifest_is_deterministic_and_list_needs_no_runtime) ... ok
+test_padded_memory_bound_and_grid_edge_outputs (test_repeat_sweep_cases.SweepCaseTests.test_padded_memory_bound_and_grid_edge_outputs) ... ok
+test_probe_checks_final_sources_and_closes_the_device (test_repeat_sweep_cases.SweepCaseTests.test_probe_checks_final_sources_and_closes_the_device) ... ok
+test_complete_report_and_rejects_changed_source (test_report_candidate_run.CandidateRunReportTests.test_complete_report_and_rejects_changed_source) ... ok
+test_rejects_failed_or_skipped_only_device_tests (test_report_candidate_run.CandidateRunReportTests.test_rejects_failed_or_skipped_only_device_tests) ... ok
+test_rejects_failed_partial_profiled_or_nonfinite_baselines (test_report_candidate_run.CandidateRunReportTests.test_rejects_failed_partial_profiled_or_nonfinite_baselines) ... ok
+test_rejects_missing_cases_or_checks (test_report_candidate_run.CandidateRunReportTests.test_rejects_missing_cases_or_checks) ... ok
+test_rejects_wrong_base_and_records_candidate_commit (test_report_candidate_run.CandidateRunReportTests.test_rejects_wrong_base_and_records_candidate_commit) ... ok
+test_uses_raw_samples_and_retains_outliers (test_report_candidate_run.CandidateRunReportTests.test_uses_raw_samples_and_retains_outliers) ... ok
+test_complete_report_retains_every_case_and_outliers (test_report_repeat_sweep.SweepReportTests.test_complete_report_retains_every_case_and_outliers) ... ok
+test_losing_cases_cannot_be_hidden_by_aggregate_winners (test_report_repeat_sweep.SweepReportTests.test_losing_cases_cannot_be_hidden_by_aggregate_winners) ... ok
+test_rejects_changed_case_specification_or_missing_cases (test_report_repeat_sweep.SweepReportTests.test_rejects_changed_case_specification_or_missing_cases) ... ok
+test_rejects_dirty_changed_unlabelled_or_short_probes (test_report_repeat_sweep.SweepReportTests.test_rejects_dirty_changed_unlabelled_or_short_probes) ... ok
+test_rejects_reused_starts_and_cross_capture_source_changes (test_report_repeat_sweep.SweepReportTests.test_rejects_reused_starts_and_cross_capture_source_changes) ... ok
+test_rejects_saved_manifest_selection_and_skipped_device_tests (test_report_repeat_sweep.SweepReportTests.test_rejects_saved_manifest_selection_and_skipped_device_tests) ... ok
+test_report_refuses_partial_evidence_without_writing_success_json (test_report_repeat_sweep.SweepReportTests.test_report_refuses_partial_evidence_without_writing_success_json) ... ok
+test_requires_raw_single_csv_with_matching_indices_and_device (test_report_repeat_sweep.SweepReportTests.test_requires_raw_single_csv_with_matching_indices_and_device) ... ok
+test_rejects_comparison_between_devices (test_summarize_repeat_capture.CaptureSummaryTests.test_rejects_comparison_between_devices) ... ok
+test_rejects_invalid_duration (test_summarize_repeat_capture.CaptureSummaryTests.test_rejects_invalid_duration) ... ok
+test_rejects_mismatched_sample_indices (test_summarize_repeat_capture.CaptureSummaryTests.test_rejects_mismatched_sample_indices) ... ok
+test_rejects_multiple_devices_in_a_region (test_summarize_repeat_capture.CaptureSummaryTests.test_rejects_multiple_devices_in_a_region) ... ok
+test_rejects_unclosed_or_aborted_regions (test_summarize_repeat_capture.CaptureSummaryTests.test_rejects_unclosed_or_aborted_regions) ... ok
+test_requires_the_actual_new_kernel (test_summarize_repeat_capture.CaptureSummaryTests.test_requires_the_actual_new_kernel) ... ok
+test_sums_each_measured_call_before_taking_median (test_summarize_repeat_capture.CaptureSummaryTests.test_sums_each_measured_call_before_taking_median) ... ok
+test_build_failure_preserves_log_and_stops (test_sweep_workflow.SweepWorkflowTests.test_build_failure_preserves_log_and_stops) ... ok
+test_capture_failure_stops_without_success_report (test_sweep_workflow.SweepWorkflowTests.test_capture_failure_stops_without_success_report) ... ok
+test_correctness_failure_stops_before_any_benchmark (test_sweep_workflow.SweepWorkflowTests.test_correctness_failure_stops_before_any_benchmark) ... ok
+test_host_failure_stops_before_captures (test_sweep_workflow.SweepWorkflowTests.test_host_failure_stops_before_captures) ... ok
+test_non_improvement_and_invalid_report_statuses_are_preserved (test_sweep_workflow.SweepWorkflowTests.test_non_improvement_and_invalid_report_statuses_are_preserved) ... ok
+test_preflight_failure_stops_before_build_or_device (test_sweep_workflow.SweepWorkflowTests.test_preflight_failure_stops_before_build_or_device) ... ok
+test_refuses_missing_own_environment (test_sweep_workflow.SweepWorkflowTests.test_refuses_missing_own_environment) ... ok
+test_refuses_non_linux_and_invalid_arguments (test_sweep_workflow.SweepWorkflowTests.test_refuses_non_linux_and_invalid_arguments) ... ok
+test_runs_all_listed_cases_in_isolated_environment (test_sweep_workflow.SweepWorkflowTests.test_runs_all_listed_cases_in_isolated_environment) ... ok
+
+----------------------------------------------------------------------
+Ran 85 tests in 75.739s
+
+OK

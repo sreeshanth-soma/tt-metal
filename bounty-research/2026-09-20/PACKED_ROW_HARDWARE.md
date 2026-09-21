@@ -63,13 +63,12 @@ configuration, not a guarantee for every supported shape, dtype, architecture
 or model. The 177-test correctness result does not establish performance for
 all those test inputs. Public H/W routing remains disabled.
 
-The next validation-only update keeps the measured reader unchanged and runs
-the complete workflow three times in separate processes. Its confirmation
-report checks raw artifacts, source/runtime/device consistency, distinct probe
-starts, sample counts, and every run's median ratios rather than selecting the
-best run. Any target-case median regression or incomplete validation prevents
-a passing confirmation. A pass is repeatability evidence only; it does not
-enable routing or replace a broader shape/performance sweep, appropriate
-architecture coverage, model integration, project CI, or maintainer review.
+The subsequent validation-only update kept the measured reader unchanged.
+The user reported a passing three-run confirmation at commit
+`472a874bde067c9cca9ba3a61fe8087706ad600a`; see `PACKED_ROW_CONFIRMATION.md` for
+that separate record and its provenance limits. All five target cases improved
+both metrics in every run. This does not enable routing or replace a broader
+shape/performance sweep, appropriate architecture coverage, model integration,
+project CI, or maintainer review.
 
 No issue, PR, bounty assignment or eligibility has been established by this run.

@@ -1,7 +1,8 @@
 {
   "date": "2026-09-21",
   "base_commit": "9173350554b616022b3aa7c4fbad33f13cb36aee",
-  "status": "packed_row_single_user_hardware_run_passed_repeatability_workflow_locally_validated",
+  "status": "packed_row_user_three_run_confirmation_passed_broader_hardware_sweep_pending",
+  "validation_history_note": "Local unittest/format records retain the prior 59-test run. See SWEEP_HOST_VALIDATION.json for the newer sweep tooling; hardware confirmation provenance is in PACKED_ROW_CONFIRMATION.md.",
   "submission_ready": false,
   "automatic_subtile_routing": "disabled; candidate requires the existing private forced-codegen entry",
   "host_environment": {
@@ -114,7 +115,6 @@
   },
   "not_validated": [
     "Independent local re-parsing of user hardware artifacts; only the supplied terminal summary is available locally",
-    "Three-run hardware confirmation with the new validation-only workflow",
     "Performance across all supported shapes, repeat counts and dtypes beyond the five BF16 benchmark cases",
     "Automatic public H/W routing and its end-to-end integration",
     "Blackhole correctness and performance",
@@ -158,7 +158,13 @@
   },
   "repeatability_workflow": {
     "local_tests": 15,
-    "hardware_execution": "pending",
+    "hardware_execution": "user_reported_pass_at_472a874bde067c9cca9ba3a61fe8087706ad600a",
+    "evidence": "PACKED_ROW_CONFIRMATION.md",
+    "artifact_directory_on_hardware_host": "/tmp/tt-repeat-confirm.q95sgv",
+    "runs": 3,
+    "device_tests_passed_per_run": 177,
+    "all_target_host_and_device_medians_improved_in_every_run": true,
+    "provenance": "Complete terminal report supplied by user; raw hardware artifacts not available locally or independently re-parsed",
     "reader_and_device_tests_changed_since_user_run": false,
     "scope": "Three separate complete runs; compare every target case and run without pooling samples, selecting the best run or enabling routing",
     "mocks_are_hardware_evidence": false

@@ -6,7 +6,7 @@ Updated: **September 21, 2026**. Base: `9173350554b616022b3aa7c4fbad33f13cb36aee
 
 The submission worth pursuing is a **measured, narrowly routed, tile-preserving copy implementation of H/W repeat-interleave**. It is not a universal dense-matmul replacement and not a redo of the already-merged repeat codegen port.
 
-The packed-row candidate completed the user's Wormhole build and validation at commit `0f7d9dfdacd347baf3f3cdd0fd7b75dc365c55a1`: **177 device tests passed**, and **all five H/W cases improved both unprofiled host latency and profiled device-kernel sums**. The reported ratios are 3.023x–4.048x for host latency and 1.821x–2.236x for device-kernel sums. See `PACKED_ROW_HARDWARE.md` for the measurements, source hash and provenance limits. This is one successful run, not a universal or production-routing claim. The validation-only follow-up keeps the measured kernel unchanged and checks three complete runs before any routing decision. The H/W path remains accessible through the existing private forced-codegen entry only; public routing stays native.
+The packed-row candidate completed the user's Wormhole build and validation at commit `0f7d9dfdacd347baf3f3cdd0fd7b75dc365c55a1`, followed by a **passing three-run confirmation** at `472a874bde067c9cca9ba3a61fe8087706ad600a`. Each confirmation run passed **177 device tests**, and **all five H/W cases improved both unprofiled host latency and profiled device-kernel sums in every run**. Confirmation ratios are 2.797x–4.293x for host latency and 1.799x–2.247x for device-kernel sums. See `PACKED_ROW_HARDWARE.md` and `PACKED_ROW_CONFIRMATION.md` for the separate records and provenance limits. The measured kernel is unchanged. Repeatability covers these BF16 inputs, not every supported shape/dtype or production routing. The next gate is `REPEAT_PERFORMANCE_SWEEP.md`; public H/W routing stays native.
 
 The earlier scalar reader passed 135 tests but regressed device time in four of five cases. Its separate evidence remains in `DIRECT_TILE_V1_HARDWARE.md`; do not combine those measurements with the packed-row result.
 
@@ -25,7 +25,7 @@ These are acceptance prerequisites and relevant review precedents, not a promise
 | Rebound input/output buffers on cache hits | Same review required a second dispatch with fresh allocations | Tests retain both inputs and outputs and check cache count |
 | Installed JIT source availability | PR #50700 review discussion `3702406187` / `3703439258` found a packaging omission | New reader matches existing CMake `*.cpp` kernel glob; a fresh configure is required |
 | No dead or redundant kernel code | PR #50700 review discussion `3751739682` / `3756762075` | One reader, no new public API; unnecessary second scratch page removed |
-| Actual performance evidence without regressions | Performance category in `CONTRIBUTING.md:160` | Packed-row run improves both medians in five BF16 cases; repeated runs and broader coverage remain pending |
+| Actual performance evidence without regressions | Performance category in `CONTRIBUTING.md:160` | Three-run confirmation improves both medians in all five BF16 cases; broader coverage remains pending |
 | Required CI, beyond initial PR checks | `CONTRIBUTING.md:134` | Not run; maintainer-triggered coverage may be needed |
 
 The title/description searches found no open PR explicitly implementing this generic tiled H/W path at the audit time. That is **not proof of exclusivity** or permission to claim someone else's issue. Model-specific repeat elimination, concat ports, and matmul tuning are separate overlapping areas to avoid packaging into this change.
@@ -95,7 +95,7 @@ On the observed 8×9 grid, output-page splitting assigns the width case's 64 til
 - AddressSanitizer and UndefinedBehaviorSanitizer, `-Wall -Wextra -Werror`.
 - Guarded scratch/output allocations, current-reservation checks on every write, delayed mock NoC reads until the barrier, batched writer backpressure/ring-wrap checks, raw special-value bit patterns, and exact padded-output comparison.
 - Mock access counters require exactly one store per output word, packed source loads for H and aligned W, and source-word reuse for aligned W. They are structural checks, **not device timing estimates**.
-- The host suite also covers profiler signposts, alternated benchmark order, CLI preflight, old-checkout rejection, committed-descendant acceptance, simulation/debug-mode rejection, CSV aggregation, report identity checks, environment isolation, failure-stop behavior, and three-run confirmation. Confirmation fixtures reject copied or mismatched runs, insufficient samples, skips, dirty tracked sources, and any target-case median regression. These fixtures are not hardware measurements. `HOST_VALIDATION.json` and `HOST_VALIDATION.txt` record the current run's counts, hashes and formatting/syntax checks.
+- The host suite also covers profiler signposts, alternated benchmark order, CLI preflight, old-checkout rejection, committed-descendant acceptance, simulation/debug-mode rejection, CSV aggregation, report identity checks, environment isolation, failure-stop behavior, and three-run confirmation. Confirmation fixtures reject copied or mismatched runs, insufficient samples, skips, dirty tracked sources, and any target-case median regression. The expanded-sweep tests additionally check its fixed matrix, dtype handling, raw-artifact completeness, source stability and retention of every non-improvement. These fixtures are not hardware measurements. `HOST_VALIDATION.json` and `HOST_VALIDATION.txt` retain the earlier 59-test run; `SWEEP_HOST_VALIDATION.json` and `SWEEP_HOST_VALIDATION.txt` record validation of the newer sweep tooling.
 
 These are **host mocks**, not official tt-emule or Tenstorrent hardware. They do not validate actual NoC transactions, the complete TTNN C++ build, physical allocator behavior, real cache rebinding, device compiler ABI, or speed. `HOST_VALIDATION.json` records the final source hash and results.
 
@@ -103,9 +103,14 @@ These are **host mocks**, not official tt-emule or Tenstorrent hardware. They do
 
 The first 81 added device-test instances were included in the user's passing 135-test run at commit `8d601ab0ee2e7bd4383fd347b4ac6aecf820d912`. The packed-row revision adds 42 more instances: ragged/single-element W repeats, an R=16 general-path case, and special-value bit patterns for R=2/4/8. There are now 123 added instances relative to the pinned base; existing routing tests continue to check native fallback. **The user's second run passed all 177 focused tests at commit `0f7d9dfdacd347baf3f3cdd0fd7b75dc365c55a1`, with no skips/failures/errors.**
 
-The local environment is macOS without a TT device or Torch/TTNN runtime. The second supplied summary reports the packed-row Linux build, hardware correctness and five-case performance result; its raw artifacts remain on the user's hardware host and have not been independently re-parsed locally. The three-run workflow has not yet been executed on that hardware. Broader shape/dtype performance, Blackhole, installed-wheel packaging, project CI and model-level performance remain unverified.
+The local environment is macOS without a TT device or Torch/TTNN runtime. The supplied summaries report the packed-row Linux build, hardware correctness, five-case performance result and a passing three-run confirmation. Their raw artifacts remain on the user's hardware host and have not been independently re-parsed locally. Broader shape/dtype performance, Blackhole, installed-wheel packaging, project CI and model-level performance remain unverified.
 
 ## Hardware handoff: repeated confirmation
+
+**Completed on the user's hardware host.** Keep `/tmp/tt-repeat-confirm.q95sgv`
+unchanged. The following commands document the completed workflow; do not rerun
+it merely to obtain another copy of the same report. The next hardware screen
+is documented in `REPEAT_PERFORMANCE_SWEEP.md`.
 
 For the already prepared candidate checkout, **do not clone again or rerun setup**:
 

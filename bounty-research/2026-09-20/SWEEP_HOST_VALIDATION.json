@@ -1,0 +1,80 @@
+{
+  "date": "2026-09-21",
+  "status": "host_validation_passed_broader_hardware_sweep_pending",
+  "working_tree_base_commit": "472a874bde067c9cca9ba3a61fe8087706ad600a",
+  "base_commit": "9173350554b616022b3aa7c4fbad33f13cb36aee",
+  "host_environment": {
+    "platform": "macOS",
+    "python": "3.13.7",
+    "tenstorrent_device_execution": false
+  },
+  "production_and_device_tests": {
+    "changed": false,
+    "source_files_checked_against_previous_validation": 7,
+    "reader_sha256": "987446139978004bd4b9c148742382f8aefae8259fb27946baf8b280431676fc",
+    "automatic_subtile_routing": "disabled; existing private forced-codegen entry only"
+  },
+  "unittest": {
+    "command": "python3 -m unittest discover -s bounty-research/2026-09-20 -p 'test_*.py' -v",
+    "tests": 85,
+    "new_sweep_tests": 26,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "elapsed_seconds": 75.739,
+    "log": "SWEEP_HOST_VALIDATION.txt",
+    "log_sha256": "ed69dbba4ded1b82c4affee642e31ef986a23a9b840c98b6e669707aa9bc6214"
+  },
+  "actual_reader_host_test": {
+    "compile_time_variants": 32,
+    "cases": 8032,
+    "mock_core_invocations": 113716,
+    "checked_padded_elements": 1020428288,
+    "source_l1_halfword_reads": 156127040,
+    "source_l1_word_reads": 186919358,
+    "output_l1_word_writes": 765321216,
+    "sanitizers": ["AddressSanitizer", "UndefinedBehaviorSanitizer"],
+    "scope": "Actual reader with guarded host mocks, not Tenstorrent device execution"
+  },
+  "format_and_syntax": {
+    "black": {
+      "version": "23.10.1",
+      "changed_python_files_checked": 6,
+      "result": "pass",
+      "broader_directory_check": "Two pre-existing unchanged files would be reformatted: hardware_probe.py and test_hardware_probe.py. They were not modified."
+    },
+    "python_3_10_grammar": {"research_python_files_checked": 18, "result": "pass"},
+    "bash_syntax": {"script": "run_repeat_performance_sweep.sh", "result": "pass"},
+    "macos_hardware_workflow_refusal": {"expected_exit_code": 2, "result": "pass"},
+    "git_diff_check": "pass"
+  },
+  "sweep": {
+    "schema": "repeat-hw-performance-sweep-v1",
+    "manifest_sha256": "e6bfa0119d8caa64e28ea21c2df7a069154ce2e2a492dff2337f27c8ecd7f5e1",
+    "geometries": 32,
+    "dtypes": ["bf16", "fp32", "int32"],
+    "cases": 96,
+    "maximum_padded_output_bytes": 16777216,
+    "list_cli_without_runtime": "pass",
+    "hardware_execution": "pending",
+    "synthetic_fixture_results_are_hardware_evidence": false,
+    "reference": "REPEAT_PERFORMANCE_SWEEP.md"
+  },
+  "previous_hardware_confirmation": {
+    "commit": "472a874bde067c9cca9ba3a61fe8087706ad600a",
+    "runs": 3,
+    "device_tests_passed_per_run": 177,
+    "status": "user_reported_pass",
+    "evidence": "PACKED_ROW_CONFIRMATION.md",
+    "provenance": "User supplied complete terminal report; raw artifacts remain on the hardware host and have not been independently re-parsed locally"
+  },
+  "validation_tools_sha256": {
+    "bounty-research/2026-09-20/repeat_candidate_probe.py": "c076cb44af23c44516a5b313682dc3750d169ca66e79d6465d3eba9dc5e91fbb",
+    "bounty-research/2026-09-20/repeat_sweep_cases.py": "ede372ac4db8f6111fff5d8b2c49e4c5015686f2f0e7af965705895bde003881",
+    "bounty-research/2026-09-20/report_repeat_sweep.py": "b1723897bf45d9c87dbaee6fd2b302e542c17043326f6be20a2b409651ab4604",
+    "bounty-research/2026-09-20/run_repeat_performance_sweep.sh": "d26709cded0f7300478086ddac267f2b5e1f42da183a6020a55846d328b06ff1",
+    "bounty-research/2026-09-20/test_repeat_sweep_cases.py": "0a262d532cd85b7910367d579b20f0e4797e04eabb40442d15dc8c5bfec43758",
+    "bounty-research/2026-09-20/test_report_repeat_sweep.py": "bb80934077bc502c36f1f1356ecf1ecdc56a4833a4ece90324b2d203b11498a2",
+    "bounty-research/2026-09-20/test_sweep_workflow.py": "fec81951813209cffbb859c36511616590c32bbf283097a957b0de90155707d2"
+  }
+}

@@ -12,6 +12,7 @@ import sys
 import traceback
 
 from hardware_probe import REPEAT_CASES, Reporter, Runtime, command_result
+from repeat_sweep_cases import SWEEP_CASES, manifest, manifest_sha256
 
 EXPECTED_BASE = "9173350554b616022b3aa7c4fbad33f13cb36aee"
 REVISION = "repeat-direct-tile-candidate-v3-packed-rows"
@@ -26,7 +27,8 @@ SOURCE_PATHS = (
 
 def parse_arguments(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--case", choices=[case.name for case in REPEAT_CASES])
+    parser.add_argument("--suite", choices=("focused", "sweep"), default="focused")
+    parser.add_argument("--case", choices=[case.name for case in (*REPEAT_CASES, *SWEEP_CASES)])
     parser.add_argument("--device", type=int, default=0)
     parser.add_argument("--warmup", type=int, default=10)
     parser.add_argument("--samples", type=int, default=51)
@@ -34,6 +36,9 @@ def parse_arguments(argv=None):
     parser.add_argument("--list", action="store_true", dest="list_only")
     parser.add_argument("--output")
     arguments = parser.parse_args(argv)
+    available = SWEEP_CASES if arguments.suite == "sweep" else REPEAT_CASES
+    if arguments.case is not None and arguments.case not in {case.name for case in available}:
+        parser.error("--case must belong to the selected --suite")
     if arguments.warmup < 1 or arguments.samples < 3:
         parser.error("Use at least one warmup and three samples")
     if arguments.device < 0:
@@ -47,6 +52,10 @@ def parse_arguments(argv=None):
         parser.error("Device profiling requires one --case, at most ten warmups and sixteen samples")
     if profiling and not arguments.tracy_signposts:
         parser.error("Use --tracy-signposts so device measurements can be assigned to samples")
+    if arguments.suite == "sweep" and not arguments.list_only:
+        minimum_warmup, minimum_samples = (3, 5) if profiling else (10, 51)
+        if arguments.warmup < minimum_warmup or arguments.samples < minimum_samples:
+            parser.error(f"Sweep requires at least {minimum_warmup} warmups and {minimum_samples} samples")
     return arguments
 
 
@@ -80,8 +89,9 @@ def bit_metrics(torch, actual, expected):
     dtype_match = actual.dtype == expected.dtype
     if not shape_match or not dtype_match:
         return {"shape_match": shape_match, "dtype_match": dtype_match, "exact_bits": False}
-    actual_bits = actual.contiguous().view(torch.int16)
-    expected_bits = expected.contiguous().view(torch.int16)
+    bits_dtype = torch.int16 if expected.dtype == torch.bfloat16 else torch.int32
+    actual_bits = actual.contiguous().view(bits_dtype)
+    expected_bits = expected.contiguous().view(bits_dtype)
     mismatches = int((actual_bits != expected_bits).sum().item())
     return {
         "shape_match": True,
@@ -92,14 +102,44 @@ def bit_metrics(torch, actual, expected):
     }
 
 
+def make_input(torch, case):
+    generator = torch.Generator().manual_seed(20260920)
+    dtype = getattr(case, "dtype", "bf16")
+    if dtype == "int32":
+        return torch.randint(-(2**31), 2**31, case.shape, generator=generator, dtype=torch.int32)
+    if dtype == "fp32":
+        return torch.randint(-(2**23), 2**23, case.shape, generator=generator).to(torch.float32) / 2**23
+    return torch.randint(-64, 65, case.shape, generator=generator).to(torch.bfloat16) / 16
+
+
+def source_state():
+    return {
+        "git_head": command_result(["git", "rev-parse", "HEAD"]),
+        "tracked_changes": command_result(["git", "status", "--short", "--untracked-files=no"]),
+        "source_sha256": {path: hashlib.sha256(Path(path).read_bytes()).hexdigest() for path in SOURCE_PATHS},
+        "probe_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "timing_helper_sha256": hashlib.sha256(Path(__file__).with_name("hardware_probe.py").read_bytes()).hexdigest(),
+        "case_catalog_sha256": hashlib.sha256(
+            Path(__file__).with_name("repeat_sweep_cases.py").read_bytes()
+        ).hexdigest(),
+    }
+
+
+def require_clean_state(state):
+    changes = state["tracked_changes"]
+    if changes.get("returncode") != 0 or changes.get("stdout") != "":
+        raise RuntimeError("Sweep requires a clean tracked checkout; preserve changes rather than resetting them")
+
+
 def run_case(runtime, case, arguments):
     torch, ttnn = runtime.torch, runtime.ttnn
     reporter = runtime.reporter
-    reporter.emit("case_start", case=asdict(case), dtype="bf16")
-    generator = torch.Generator().manual_seed(20260920)
-    source = torch.randint(-64, 65, case.shape, generator=generator).to(torch.bfloat16) / 16
+    dtype = getattr(case, "dtype", "bf16")
+    reporter.emit("case_start", case=asdict(case), dtype=dtype)
+    source = make_input(torch, case)
     expected = torch.repeat_interleave(source, case.repeats, case.dimension)
-    device_input = runtime.upload(source, ttnn.bfloat16)
+    device_dtype = {"bf16": ttnn.bfloat16, "fp32": ttnn.float32, "int32": ttnn.int32}[dtype]
+    device_input = runtime.upload(source, device_dtype)
     private_ops = ttnn._ttnn.operations.data_movement
     forced = getattr(private_ops, "repeat_interleave_force_codegen", None)
     if not callable(forced):
@@ -148,8 +188,12 @@ def run_case(runtime, case, arguments):
 
 def main(argv=None):
     arguments = parse_arguments(argv)
-    cases = [case for case in REPEAT_CASES if arguments.case is None or case.name == arguments.case]
+    available = SWEEP_CASES if arguments.suite == "sweep" else REPEAT_CASES
+    cases = [case for case in available if arguments.case is None or case.name == arguments.case]
     if arguments.list_only:
+        if arguments.suite == "sweep":
+            print(json.dumps({**manifest(), "manifest_sha256": manifest_sha256()}, indent=2))
+            return 0
         print(
             json.dumps(
                 {"revision": REVISION, "base": EXPECTED_BASE, "cases": [asdict(case) for case in cases]}, indent=2
@@ -161,18 +205,18 @@ def main(argv=None):
     runtime = None
     status = 0
     try:
-        head = preflight()
+        preflight()
+        state = source_state()
+        if arguments.suite == "sweep":
+            require_clean_state(state)
         reporter.emit(
             "environment",
             utc=datetime.now(timezone.utc).isoformat(),
             revision=REVISION,
             base_commit=EXPECTED_BASE,
             arguments=vars(arguments),
-            git_head=head,
-            tracked_changes=command_result(["git", "status", "--short", "--untracked-files=no"]),
-            source_sha256={path: hashlib.sha256(Path(path).read_bytes()).hexdigest() for path in SOURCE_PATHS},
-            probe_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-            timing_helper_sha256=hashlib.sha256(Path(__file__).with_name("hardware_probe.py").read_bytes()).hexdigest(),
+            **state,
+            sweep_manifest_sha256=manifest_sha256() if arguments.suite == "sweep" else None,
             python=sys.version,
             python_executable=sys.executable,
             environment={
@@ -196,9 +240,19 @@ def main(argv=None):
         if not Path(ttnn_module.__file__).resolve().is_relative_to(Path.cwd().resolve()):
             raise RuntimeError("TTNN was imported outside this checkout; activate its Python environment and rebuild")
         runtime = Runtime(arguments.device, reporter, tracy_signposts=arguments.tracy_signposts)
+        if arguments.suite == "sweep":
+            flags = ("enable_comparison_mode", "enable_logging", "enable_graph_report", "enable_tensor_report")
+            if any(getattr(runtime.ttnn.CONFIG, flag, False) for flag in flags):
+                raise RuntimeError("Disable TTNN comparison/logging/reporting before collecting sweep timings")
         runtime.describe_device()
         for case in cases:
             run_case(runtime, case, arguments)
+        if arguments.suite == "sweep":
+            final_state = source_state()
+            require_clean_state(final_state)
+            if final_state != state:
+                raise RuntimeError("Source or benchmark tools changed during the sweep; discard this probe")
+            reporter.emit("source_state_end", **final_state)
         reporter.emit("suite_finished", message="Candidate evidence only; not merge or bounty approval")
     except Exception as error:
         reporter.emit("error", error_type=type(error).__name__, message=str(error), traceback=traceback.format_exc())
